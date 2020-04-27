@@ -1,7 +1,19 @@
+# ##### BEGIN LICENSE BLOCK #####
+#
+#  Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) 
+#
+#  This work is licensed under the Creative Commons
+#  Attribution-NonCommercial-NoDerivatives 4.0 International License. 
+#
+#  To view a copy of this license,
+#  visit http://creativecommons.org/licenses/by-nc-nd/4.0/.
+#
+# ##### END LICENSE BLOCK #####
+
 bl_info = {
     "name": "Darkfall VFX Nodes",
     "author": "Darkfall",
-    "version": (1, 6),
+    "version": (1, 7),
     "blender": (2, 80, 0),
     "location": "Compositor > Node Editor Toolbar > Darkfall VFX Nodes",
     "description": "Tools to help speed up your VFX Workflow for the following tasks." "VFX Eye Color Change." "VFX Scifi Eyes." "Patch Node." "Glitch Effect." "Sketch Effect." "Posterize Effect." "Ink Drop Effect",
@@ -9,37 +21,20 @@ bl_info = {
         "Blog": "http://bit.ly/2kB5XYt"
 }
 
-
 import bpy
 import nodeitems_utils
-from bpy.types import Header, Menu, Panel
+from bpy.types import Header, Menu, Panel, Operator, Node
 from bpy.app.translations import pgettext_iface as iface_
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Create compositor planar tool
 def create_planar_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    # Create a group
     planar_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # create group inputs
     group_inputs = planar_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     planar_group.inputs.new('NodeSocketFloat','Area Of Effect Mask')
@@ -55,16 +50,9 @@ def create_planar_group(context, operator, group_name):
     planar_group.inputs[6].default_value = 0
     planar_group.inputs[7].default_value = 0
     
-    
-    
-        # create group outputs
     group_outputs = planar_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2300,400)
     planar_group.outputs.new('NodeSocketColor','Output')
-    
-    
-    
-    #nodes to be added to group
         
     rerout1_node = planar_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,150
@@ -72,7 +60,6 @@ def create_planar_group(context, operator, group_name):
     rerout2_node = planar_group.nodes.new(type= 'NodeReroute')
     rerout2_node.location = -100,150
     
-        
     dil_node = planar_group.nodes.new(type= 'CompositorNodeDilateErode')
     dil_node.location = 0,500
     dil_node.label = "Drop Shadow Amount"
@@ -103,7 +90,6 @@ def create_planar_group(context, operator, group_name):
     blur3_node.filter_type = 'FAST_GAUSS'
     blur3_node.hide = True
     
-    
     translate1_node = planar_group.nodes.new(type= 'CompositorNodeTranslate')
     translate1_node.location = 100,0
     translate1_node.hide = True
@@ -114,7 +100,6 @@ def create_planar_group(context, operator, group_name):
     mix1_node.blend_type = 'OVERLAY'
     mix1_node.use_alpha = True 
     
-    
     math1_node = planar_group.nodes.new(type= 'CompositorNodeMath')
     math1_node.location = 300,0
     math1_node.use_clamp = True
@@ -124,15 +109,6 @@ def create_planar_group(context, operator, group_name):
     alphaover1_node = planar_group.nodes.new(type= 'CompositorNodeAlphaOver')
     math1_node.location = 500,0
     alphaover1_node.hide = True
-    
-    
-    
-    
-     #link nodes together
-
-   
-    
-    
     
     planar_group.links.new(rerout1_node.outputs[0], dil_node.inputs[0])
     planar_group.links.new(rerout1_node.outputs[0], blur1_node.inputs[0])
@@ -147,10 +123,6 @@ def create_planar_group(context, operator, group_name):
     planar_group.links.new(blur1_node.outputs[0], mix1_node.inputs[0])
     planar_group.links.new(mix1_node.outputs[0], alphaover1_node.inputs[1])
     
-    
-    # link inputs
-        
-        
     planar_group.links.new(group_inputs.outputs['Area Of Effect Mask'], rerout1_node.inputs[0])
     planar_group.links.new(group_inputs.outputs['Movie Clip'], mix1_node.inputs[1])
     planar_group.links.new(group_inputs.outputs['Image'], mix1_node.inputs[2])
@@ -160,39 +132,18 @@ def create_planar_group(context, operator, group_name):
     planar_group.links.new(group_inputs.outputs['Drop Shadow X'], translate1_node.inputs[1])
     planar_group.links.new(group_inputs.outputs['Drop Shadow Y'], translate1_node.inputs[2])
 
-    
-    
-        #link output
     planar_group.links.new(alphaover1_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return planar_group
 
 
-
-
-
-
-
-
-
-
-
-
-
-# Create compositor subsurface node
 def create_subsurface_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    # Create a group
     subsurface_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # create group inputs
     group_inputs = subsurface_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     subsurface_group.inputs.new('NodeSocketFloat','Area Of Effect Mask')
@@ -200,28 +151,16 @@ def create_subsurface_group(context, operator, group_name):
     subsurface_group.inputs.new('NodeSocketColor','Image')
     subsurface_group.inputs.new('NodeSocketFloat','Mask Feather')
     
-    
-    
-    
-    
-        # create group outputs
     group_outputs = subsurface_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2300,400)
     subsurface_group.outputs.new('NodeSocketColor','Output')
-    
-    
-    
-    #nodes to be added to group
         
     rerout1_node = subsurface_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,150
     
     rerout2_node = subsurface_group.nodes.new(type= 'NodeReroute')
     rerout2_node.location = -100,150
-    
-        
-    
-    
+
     blur1_node = subsurface_group.nodes.new(type= 'CompositorNodeBlur')
     blur1_node.location = -100,200
     blur1_node.size_x = 1
@@ -229,10 +168,6 @@ def create_subsurface_group(context, operator, group_name):
     blur1_node.inputs[1].default_value = 0
     blur1_node.filter_type = 'FAST_GAUSS'
     blur1_node.hide = True
-    
-    
-    
-    
     
     translate1_node = subsurface_group.nodes.new(type= 'CompositorNodeTranslate')
     translate1_node.location = 100,0
@@ -244,75 +179,27 @@ def create_subsurface_group(context, operator, group_name):
     mix1_node.blend_type = 'DODGE'
     mix1_node.use_alpha = True 
     
-    
-    
-    
-    
-    
-    
-    
-    
-     #link nodes together
-
     subsurface_group.links.new(rerout1_node.outputs[0], blur1_node.inputs[0])
     subsurface_group.links.new(rerout2_node.outputs[0], blur1_node.inputs[1])
     subsurface_group.links.new(blur1_node.outputs[0], mix1_node.inputs[0])
-    
-    
-    # link inputs
-        
-        
+
     subsurface_group.links.new(group_inputs.outputs['Area Of Effect Mask'], rerout1_node.inputs[0])
     subsurface_group.links.new(group_inputs.outputs['Movie Clip'], mix1_node.inputs[1])
     subsurface_group.links.new(group_inputs.outputs['Image'], mix1_node.inputs[2])
     subsurface_group.links.new(group_inputs.outputs['Mask Feather'], rerout2_node.inputs[0])
     
-
-    
-    
-        #link output
     subsurface_group.links.new(mix1_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return subsurface_group
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Create compositor group clone
 def create_clone_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    # Create a group
     clone_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # create group inputs
     group_inputs = clone_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
     clone_group.inputs.new('NodeSocketFloat','Clone Mask')
@@ -322,23 +209,15 @@ def create_clone_group(context, operator, group_name):
     clone_group.inputs.new('NodeSocketFloat','Position Y')
     clone_group.inputs.new('NodeSocketFloat','Rotation')
     clone_group.inputs.new('NodeSocketFloat','Scale')
-    
     clone_group.inputs.new('NodeSocketFloat','Clone Feather')
-    
     clone_group.inputs.new('NodeSocketFloat','Garbage Feather')
     clone_group.inputs[7].default_value = 1
     clone_group.inputs[6].default_value = 1
     
-    
-        # create group outputs
     group_outputs = clone_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2300,400)
     clone_group.outputs.new('NodeSocketColor','Output')
     
-    
-    
-    #nodes to be added to group
-        
     rerout1_node = clone_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,150
     
@@ -351,10 +230,8 @@ def create_clone_group(context, operator, group_name):
     rerout4_node = clone_group.nodes.new(type= 'NodeReroute')
     rerout4_node.location = 0,0
     
-    
     rerout9_node = clone_group.nodes.new(type= 'NodeReroute')
     rerout9_node.location = 0,400
-    
     
     transf2_node = clone_group.nodes.new(type= 'CompositorNodeTransform')
     transf2_node.location = 200,200
@@ -394,82 +271,41 @@ def create_clone_group(context, operator, group_name):
     mix1_node.location = 1300,0
     mix1_node.hide = True
     
-    
-     #link nodes together
-
-   
-    
-    
-    
     clone_group.links.new(blur1_node.outputs[0], math1_node.inputs[0])
-    
-    clone_group.links.new(blur2_node.outputs[0], math1_node.inputs[1])
-        
+    clone_group.links.new(blur2_node.outputs[0], math1_node.inputs[1])  
     clone_group.links.new(math1_node.outputs[0], mix1_node.inputs[0])
-    
     clone_group.links.new(rerout1_node.outputs[0], transf2_node.inputs[1])
-    
     clone_group.links.new(rerout2_node.outputs[0], transf2_node.inputs[2])
-    
     clone_group.links.new(rerout3_node.outputs[0], transf2_node.inputs[3])
-    
     clone_group.links.new(rerout4_node.outputs[0], transf2_node.inputs[4])
-    
     clone_group.links.new(rerout9_node.outputs[0], mix1_node.inputs[1])
-    
     clone_group.links.new(rerout9_node.outputs[0], transf2_node.inputs[0])
-    
     clone_group.links.new(transf2_node.outputs[0], mix1_node.inputs[2])
-
     
-    
-    # link inputs
     clone_group.links.new(group_inputs.outputs['Clone Mask'], blur1_node.inputs[0])
-    
     clone_group.links.new(group_inputs.outputs['Garbage Mask'], blur2_node.inputs[0])
-    
     clone_group.links.new(group_inputs.outputs['Background Movie Clip'], rerout9_node.inputs[0])
-        
     clone_group.links.new(group_inputs.outputs['Position X'], rerout1_node.inputs[0])
-    
     clone_group.links.new(group_inputs.outputs['Position Y'], rerout2_node.inputs[0])
-    
     clone_group.links.new(group_inputs.outputs['Rotation'], rerout3_node.inputs[0])
-    
     clone_group.links.new(group_inputs.outputs['Scale'], rerout4_node.inputs[0])
-    
     clone_group.links.new(group_inputs.outputs['Clone Feather'], blur1_node.inputs[1])
-    
     clone_group.links.new(group_inputs.outputs['Garbage Feather'], blur2_node.inputs[1])
     
-    
-        #link output
     clone_group.links.new(mix1_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return clone_group
 
 
-
-
-# Create compositor group Eye Col
 def create_eyecol_group(context, operator, group_name):
     
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
-    # Create a group
     eyecol_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # Create group inputs
-    
-
     group_inputs = eyecol_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
-    
     
     group_inputs.location = (-200,400)
     eyecol_group.inputs.new('NodeSocketFloat','Eye Mask')
@@ -492,16 +328,9 @@ def create_eyecol_group(context, operator, group_name):
     eyecol_group.inputs[5].min_value = 0
     eyecol_group.inputs[6].min_value = 0
     
-
-        
-    
-
-    # Create group outputs
     group_outputs = eyecol_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2800,400)
     eyecol_group.outputs.new('NodeSocketColor','Output')
-
-    # Nodes inside group
     
     eyemath_node = eyecol_group.nodes.new('CompositorNodeMath')
     eyemath_node.location = 700,400
@@ -528,7 +357,6 @@ def create_eyecol_group(context, operator, group_name):
     eyemath_node.inputs[1].default_value = 1
     eyeballmath_node.hide = True
     
-    
     inv_node = eyecol_group.nodes.new(type= 'CompositorNodeInvert')
     inv_node.location = 700,700
     inv_node.hide = True
@@ -541,16 +369,11 @@ def create_eyecol_group(context, operator, group_name):
     inv3_node.location = 2000,200
     inv3_node.hide = True
     
-    
-    
-       
     mix_node = eyecol_group.nodes.new(type= 'CompositorNodeMixRGB')
     mix_node.location = 1400, 200
     mix_node.blend_type = 'SOFT_LIGHT'
     mix_node.use_clamp = True
     mix_node.hide = True
-    
-
     
     blur1_node = eyecol_group.nodes.new(type= 'CompositorNodeBlur')
     blur1_node.location = 500,700
@@ -559,8 +382,6 @@ def create_eyecol_group(context, operator, group_name):
     blur1_node.inputs[1].default_value = 0
     blur1_node.label = "Eye Mask Blur"
     blur1_node.hide = True
-    
-        
     
     blur2_node = eyecol_group.nodes.new(type= 'CompositorNodeBlur')
     blur2_node.location = 200,500
@@ -578,160 +399,81 @@ def create_eyecol_group(context, operator, group_name):
     blur3_node.label = "Garbage Mask Blur"
     blur3_node.hide = True
     
-    
-        
     rgb1_node = eyecol_group.nodes.new(type= 'CompositorNodeCurveRGB')
     rgb1_node.location = 1800, 400
     rgb1_node.label = "Eyeball Brightness"
     rgb1_node.hide = True
-    
-    
-        
+       
     rgb2_node = eyecol_group.nodes.new(type= 'CompositorNodeCurveRGB')
     rgb2_node.location = 2200, 400
     rgb2_node.label = "Eye Color Brightness"
     rgb2_node.hide = True
     
-    
     rerout1_node = eyecol_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 400, 400
     
-    
-    
-    #link nodes together
-    
     eyecol_group.links.new(eyemath_node.outputs[0], garbmath_node.inputs[0])
-    
     eyecol_group.links.new(garbmath_node.outputs[0], mix_node.inputs[0]) 
-    
     eyecol_group.links.new(blur1_node.outputs[0], eyemath_node.inputs[0])
-    
     eyecol_group.links.new(blur2_node.outputs[0], rerout1_node.inputs[0])   
-    
     eyecol_group.links.new(rerout1_node.outputs[0], eyemath_node.inputs[1])
-    
-    eyecol_group.links.new(rerout1_node.outputs[0], eyeballmath_node.inputs[1])
-                
-            
+    eyecol_group.links.new(rerout1_node.outputs[0], eyeballmath_node.inputs[1])      
     eyecol_group.links.new(blur3_node.outputs[0], garbmath_node.inputs[1])
-    
     eyecol_group.links.new(blur1_node.outputs[0], inv_node.inputs[1])
-    
-    
     eyecol_group.links.new(inv_node.outputs[0], eyeballmath_node.inputs[0])
-    
     eyecol_group.links.new(mix_node.outputs[0], rgb1_node.inputs[1])
-    
     eyecol_group.links.new(eyeballmath_node.outputs[0], rgb1_node.inputs[0])
-    
     eyecol_group.links.new(rgb1_node.outputs[0], rgb2_node.inputs[1])
-    
     eyecol_group.links.new(garbmath_node.outputs[0], rgb2_node.inputs[0])
-    
     eyecol_group.links.new(inv2_node.outputs[0], rgb1_node.inputs[3])
-    
     eyecol_group.links.new(inv3_node.outputs[0], rgb2_node.inputs[3])
     
-    
-    
-        
-    
-
-    # Link inputs
     eyecol_group.links.new(group_inputs.outputs['Eye Mask'], blur1_node.inputs[0])
-    
     eyecol_group.links.new(group_inputs.outputs['Eyelid Mask'], blur2_node.inputs[0])
     eyecol_group.links.new(group_inputs.outputs['Garbage Mask'], blur3_node.inputs[0])
-    
     eyecol_group.links.new(group_inputs.outputs['Movie Clip'], mix_node.inputs[1])
-    
     eyecol_group.links.new(group_inputs.outputs['Eye Color'], mix_node.inputs[2])
-    
     eyecol_group.links.new(group_inputs.outputs['Eye Brightness'], inv3_node.inputs[1])
-    
     eyecol_group.links.new(group_inputs.outputs['Eyeball Brightness'], inv2_node.inputs[1])
-    
     eyecol_group.links.new(group_inputs.outputs['Eye Feather'], blur1_node.inputs[1])
-
-    
     eyecol_group.links.new(group_inputs.outputs['Garbage Feather'], blur3_node.inputs[1])
-    
     eyecol_group.links.new(group_inputs.outputs['Eyelid Feather'], blur2_node.inputs[1])
     
-    
-    
-
-    # link output
     eyecol_group.links.new(rgb2_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return eyecol_group
 
 
-
-
-
-
-# Create compositor group glitch
 def create_glitch_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    
-
-
-    
-    # Create a group
     glitch_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    
-    # create group inputs
     group_inputs = glitch_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-300,0)
-    
+
     glitch_group.inputs.new('NodeSocketFloatFactor','Area of Effect')
-    
     glitch_group.inputs.new('NodeSocketColor','Movie Clip')
-    
     glitch_group.inputs.new('NodeSocketColor','Glitch Image')
-    
     glitch_group.inputs.new('NodeSocketFloat','Glitch Image Offset')
-    
     glitch_group.inputs.new('NodeSocketFloat','Glitch Image Size')  
-    
-    glitch_group.inputs.new('NodeSocketFloat','Chromatic Amount')  
-
+    glitch_group.inputs.new('NodeSocketFloat','Chromatic Amount')
     glitch_group.inputs.new('NodeSocketFloat','Glitch Movement') 
-
     glitch_group.inputs.new('NodeSocketFloat','Movie Clip Scale')
-
     glitch_group.inputs.new('NodeSocketFloat','Movie Clip Pos X')
-
     glitch_group.inputs.new('NodeSocketFloat','Movie Clip Pos Y')    
-    
     glitch_group.inputs[0].default_value = 0
     glitch_group.inputs[0].min_value = 0
     glitch_group.inputs[0].max_value = 1
     glitch_group.inputs[4].default_value = 1
     glitch_group.inputs[7].default_value = 1
     
-    
-    
-
-    
-        # create group outputs
     group_outputs = glitch_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (1700,0)
     glitch_group.outputs.new('NodeSocketColor','Output')
-    
-    
-    
-    #nodes to be added to group
-        
+
     rerout1_node = glitch_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
     
@@ -746,8 +488,6 @@ def create_glitch_group(context, operator, group_name):
     transf2_node.label = "Glitch Size and Movement"
     transf2_node.hide = True
     
-    
-    
     transf3_node = glitch_group.nodes.new(type= 'CompositorNodeTransform')
     transf3_node.location = 200,-200
     transf3_node.label = "Glitch Offset"
@@ -757,7 +497,6 @@ def create_glitch_group(context, operator, group_name):
     mix1_node.location = 400,0
     mix1_node.hide = True
     mix1_node.use_clamp = True
-    
     
     sep1_node = glitch_group.nodes.new(type= 'CompositorNodeSepRGBA')
     sep1_node.location = 600,0
@@ -780,149 +519,68 @@ def create_glitch_group(context, operator, group_name):
     mix2_node.hide = True
     mix2_node.use_clamp = True
     
-    
-    
-    
-    #link nodes together
-
-        
     glitch_group.links.new(transf2_node.outputs[0], mix1_node.inputs[0])
-    
     glitch_group.links.new(scale1_node.outputs[0], transf2_node.inputs[0])
-    
     glitch_group.links.new(transf2_node.outputs[0], mix1_node.inputs[0])
-    
     glitch_group.links.new(mix1_node.outputs[0], sep1_node.inputs[0])
-    
     glitch_group.links.new(sep1_node.outputs[0], transl1_node.inputs[0])
-    
     glitch_group.links.new(transl1_node.outputs[0], comb1_node.inputs[0])
-    
     glitch_group.links.new(sep1_node.outputs[1], comb1_node.inputs[1])
-    
     glitch_group.links.new(sep1_node.outputs[2], comb1_node.inputs[2])
-    
     glitch_group.links.new(comb1_node.outputs[0], transf1_node.inputs[0])
-    
     glitch_group.links.new(rerout1_node.outputs[0], mix1_node.inputs[1])
-    
     glitch_group.links.new(rerout1_node.outputs[0], transf3_node.inputs[0])
-    
     glitch_group.links.new(rerout1_node.outputs[0], mix2_node.inputs[2])
-    
     glitch_group.links.new(transf3_node.outputs[0], mix1_node.inputs[2])
-    
     glitch_group.links.new(transf1_node.outputs[0], mix2_node.inputs[1])
     
-        # link inputs
-
     glitch_group.links.new(group_inputs.outputs['Area of Effect'], mix2_node.inputs[0])
-    
     glitch_group.links.new(group_inputs.outputs['Movie Clip'], rerout1_node.inputs[0])
-    
     glitch_group.links.new(group_inputs.outputs['Glitch Image'], scale1_node.inputs[0])
-    
     glitch_group.links.new(group_inputs.outputs['Glitch Image Size'], transf2_node.inputs[4])
-    
     glitch_group.links.new(group_inputs.outputs['Glitch Movement'], transf2_node.inputs[2])
-    
     glitch_group.links.new(group_inputs.outputs['Chromatic Amount'], transl1_node.inputs[1])
-    
     glitch_group.links.new(group_inputs.outputs['Movie Clip Scale'], transf1_node.inputs[4])
-    
     glitch_group.links.new(group_inputs.outputs['Movie Clip Pos X'], transf1_node.inputs[1])
-    
     glitch_group.links.new(group_inputs.outputs['Movie Clip Pos Y'], transf1_node.inputs[2])
-    
     glitch_group.links.new(group_inputs.outputs['Glitch Image Offset'], transf3_node.inputs[1])
     
-    
-    
-    
-        #link output
     glitch_group.links.new(mix2_node.outputs[0], group_outputs.inputs['Output'])
     
-    
-    # return the group
     return glitch_group
 
 
-
-
-
-
-
-
-# Operator for Gradient
 class NODE_OT_texGroupGradient(bpy.types.Operator):
     bl_idname = "node.gradient_operator"
     bl_label = "Gradient Node"
     bl_description = "Click this button to add the Gradient Node"
 
-    
-
-
     def execute(self, context):
 
-        # ---------------------------------------------------------
-        # Create the texture
-        # ---------------------------------------------------------
-
-        # Create the texture
         my_texture = bpy.data.textures.new('GradientTexture', 'IMAGE')
-
-        # Enable use nodes
         my_texture.use_nodes = True
-
-        # Get the tree
         tex_tree = my_texture.node_tree
         
-
-        # Clear default nodes
         for node in tex_tree.nodes:
             tex_tree.nodes.remove(node)
 
-        # Create Nodes
         out = tex_tree.nodes.new('TextureNodeOutput')
         out.location = (400,100)
         
         blend = tex_tree.nodes.new('TextureNodeTexBlend')
         blend.location = (0,100)
-        #blend.use_flip_axis = 'VERTICAL'
+        #blend.use_flip_axis = 'VERTICAL' - Currently Not working in blender.
+        #To fix this, the Rotate node is added below.
         
         rot = tex_tree.nodes.new('TextureNodeRotate')
         rot.location = (200,100)
         rot.inputs[1].default_value = -0.25
 
-
-
-        
-        # Link Group to Output
         tex_tree.links.new(blend.outputs[0], rot.inputs[0])
         tex_tree.links.new(rot.outputs[0], out.inputs[0])
 
-        # ---------------------------------------------------------
-        # Compositor Action
-        # ---------------------------------------------------------
-        ################
-        ##############
-        #########
-        #####
-        ###
-        ##
-        
-        
-        
-        # Enable use nodes in the compositor
         context.scene.use_nodes = True
-
-        # Get the tree
         comp_tree = context.scene.node_tree
-
-        
-
-        # Create the texture node
-        
         
         comp_node_texture = comp_tree.nodes.new('CompositorNodeTexture')
         comp_node_texture.label = "Gradient"
@@ -933,63 +591,32 @@ class NODE_OT_texGroupGradient(bpy.types.Operator):
         comp_node_texture.select = False
         comp_node_texture.outputs[0].hide = True
         
-        
-        
-          
-        
-
-        # Assign the newly created texture
         comp_node_texture.texture = my_texture
-        
-        
-
 
         return {'FINISHED'}
     
 
-
-
-
-
-
-
-
-# Operator for Scanlines
-class NODE_OT_texGroupScanlines(bpy.types.Operator):
+class NODE_OT_texGroupScanlines(Operator):
     bl_idname = "node.scanline_operator"
     bl_label = "Scan lines Node"
     bl_description = "Click this button to add the Scan lines Generator Node"
 
-    
-
-
     def execute(self, context):
 
-        # ---------------------------------------------------------
-        # Create the texture
-        # ---------------------------------------------------------
-
-        # Create the texture
         my_texture = bpy.data.textures.new('ScanlinesTexture', 'IMAGE')
-
-        # Enable use nodes
         my_texture.use_nodes = True
-
-        # Get the tree
         tex_tree = my_texture.node_tree
         
-
-        # Clear default nodes
         for node in tex_tree.nodes:
             tex_tree.nodes.remove(node)
 
-        # Create Nodes
         out = tex_tree.nodes.new('TextureNodeOutput')
         out.location = (2000,100)
         
         blend = tex_tree.nodes.new('TextureNodeTexBlend')
         blend.location = (0,100)
-        #blend.use_flip_axis = 'VERTICAL'
+        #blend.use_flip_axis = 'VERTICAL' - Currently Not working in blender.
+        #To fix this, the Rotate node is added below.
         
         rot = tex_tree.nodes.new('TextureNodeRotate')
         rot.location = (200,100)
@@ -1072,10 +699,6 @@ class NODE_OT_texGroupScanlines(bpy.types.Operator):
         math11.use_clamp = True
         math11.hide = True
         
-
-
-        
-        # Link Group to Output
         tex_tree.links.new(blend.outputs[0], rot.inputs[0])
         tex_tree.links.new(rot.outputs[0], math1.inputs[0])
         tex_tree.links.new(rot.outputs[0], math2.inputs[0])
@@ -1092,97 +715,38 @@ class NODE_OT_texGroupScanlines(bpy.types.Operator):
         tex_tree.links.new(math10.outputs[0], math11.inputs[0])
         tex_tree.links.new(math11.outputs[0], out.inputs[0])
 
-        # ---------------------------------------------------------
-        # Compositor Action
-        # ---------------------------------------------------------
-        ################
-        ##############
-        #########
-        #####
-        ###
-        ##
-        
-        
-        
-        # Enable use nodes in the compositor
         context.scene.use_nodes = True
-
-        # Get the tree
         comp_tree = context.scene.node_tree
 
-        
-
-        # Create the texture node
-        
-        
         comp_node_texture = comp_tree.nodes.new('CompositorNodeTexture')
         comp_node_texture.label = "Scan lines"
         comp_node_texture.use_custom_color = True
         comp_node_texture.color = (0.177214, 0.177214, 0.177214)
         
-
         comp_node_texture.location = -50,400 
         comp_node_texture.width = 180
         comp_node_texture.select = False
         comp_node_texture.outputs[0].hide = True
-        #comp_node_texture.inputs.new('NodeSocketColor', 'Color 1')
-        #comp_node_texture.inputs.new('NodeSocketColor', 'Color 2')
         
-        
-               
-        
-
-        # Assign the newly created texture
         comp_node_texture.texture = my_texture
         
-        
-
-
         return {'FINISHED'}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# Operator for Film Grain1 (col)
-class NODE_OT_texGroupFilmGrain(bpy.types.Operator):
+class NODE_OT_texGroupFilmGrain(Operator):
     bl_idname = "node.filmgrain1_operator"
     bl_label = "Color"
     bl_description = "Click this button to add the Film Grain Node. This Grain contains colors."
 
-    
-
-
     def execute(self, context):
 
-        # ---------------------------------------------------------
-        # Create the texture
-        # ---------------------------------------------------------
-
-        # Create the texture
         my_texture = bpy.data.textures.new('FilmGrain1Texture', 'IMAGE')
-
-        # Enable use nodes
         my_texture.use_nodes = True
-
-        # Get the tree
         tex_tree = my_texture.node_tree
         
-
-        # Clear default nodes
         for node in tex_tree.nodes:
             tex_tree.nodes.remove(node)
 
-        # Create Nodes
         out = tex_tree.nodes.new('TextureNodeOutput')
         out.location = (800,100)
         
@@ -1217,8 +781,6 @@ class NODE_OT_texGroupFilmGrain(bpy.types.Operator):
         mix3.inputs[2].default_value = (1, 1, 1, 1)
         mix3.blend_type = 'SUBTRACT'
         
-        
-        # Link Group to Output
         tex_tree.links.new(noise1.outputs[0], mix1.inputs[1])
         tex_tree.links.new(noise2.outputs[0], mix1.inputs[2])
         tex_tree.links.new(mix1.outputs[0], mix2.inputs[1])
@@ -1226,29 +788,9 @@ class NODE_OT_texGroupFilmGrain(bpy.types.Operator):
         tex_tree.links.new(mix2.outputs[0], mix3.inputs[1])
         tex_tree.links.new(mix3.outputs[0], out.inputs[0])
 
-        # ---------------------------------------------------------
-        # Compositor Action
-        # ---------------------------------------------------------
-        ################
-        ##############
-        #########
-        #####
-        ###
-        ##
-        
-        
-        
-        # Enable use nodes in the compositor
         context.scene.use_nodes = True
-
-        # Get the tree
         comp_tree = context.scene.node_tree
 
-        
-
-        # Create the texture node
-        
-        
         comp_node_texture = comp_tree.nodes.new('CompositorNodeTexture')
         comp_node_texture.label = "Film Grain (color)"
         comp_node_texture.use_custom_color = True
@@ -1258,87 +800,36 @@ class NODE_OT_texGroupFilmGrain(bpy.types.Operator):
         comp_node_texture.select = False
         comp_node_texture.outputs[0].hide = True
         
-        
-        
-          
-        
-
-        # Assign the newly created texture
         comp_node_texture.texture = my_texture
         
-        
-
-
         return {'FINISHED'}
 
 
-
-
-# Operator for Film Grain2 (b and w)
-class NODE_OT_texGroupFilmGrain2(bpy.types.Operator):
+class NODE_OT_texGroupFilmGrain2(Operator):
     bl_idname = "node.filmgrain2_operator"
     bl_label = "B & W"
     bl_description = "Click this button to add the Film Grain Node. This Grain is Black and White."
 
-    
-
-
     def execute(self, context):
 
-        # ---------------------------------------------------------
-        # Create the texture
-        # ---------------------------------------------------------
-
-        # Create the texture
         my_texture = bpy.data.textures.new('FilmGrain2Texture', 'IMAGE')
-
-        # Enable use nodes
         my_texture.use_nodes = True
-
-        # Get the tree
         tex_tree = my_texture.node_tree
-        
 
-        # Clear default nodes
         for node in tex_tree.nodes:
             tex_tree.nodes.remove(node)
 
-        # Create Nodes
         out = tex_tree.nodes.new('TextureNodeOutput')
         out.location = (800,100)
         
         noise1 = tex_tree.nodes.new('TextureNodeTexNoise')
         noise1.location = (0,100)
         
-        
-        
-        # Link Group to Output
-        
         tex_tree.links.new(noise1.outputs[0], out.inputs[0])
 
-        # ---------------------------------------------------------
-        # Compositor Action
-        # ---------------------------------------------------------
-        ################
-        ##############
-        #########
-        #####
-        ###
-        ##
-        
-        
-        
-        # Enable use nodes in the compositor
         context.scene.use_nodes = True
-
-        # Get the tree
         comp_tree = context.scene.node_tree
 
-        
-
-        # Create the texture node
-        
-        
         comp_node_texture = comp_tree.nodes.new('CompositorNodeTexture')
         comp_node_texture.label = "Film Grain (B & W)"
         comp_node_texture.use_custom_color = True
@@ -1348,91 +839,32 @@ class NODE_OT_texGroupFilmGrain2(bpy.types.Operator):
         comp_node_texture.select = False
         comp_node_texture.outputs[0].hide = True
         
-        
-        
-          
-        
-
-        # Assign the newly created texture
         comp_node_texture.texture = my_texture
         
-        
-
-
         return {'FINISHED'}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Create compositor group Ink Drop
 def create_inkdrop_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    # Create a group
+
     inkdrop_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    
-        # create group inputs
     group_inputs = inkdrop_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     
     inkdrop_group.inputs.new('NodeSocketColor','Smoke Movie Clip')
-    
     inkdrop_group.inputs.new('NodeSocketColor','Black and White Text Image')
     
-    # create group outputs
     group_outputs = inkdrop_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2000,0)
     inkdrop_group.outputs.new('NodeSocketColor','Output')
     
-    
-    
-        #nodes to be added to group
-        
     rgb_node = inkdrop_group.nodes.new(type= 'CompositorNodeCurveRGB')
     rgb_node.location = 600,150
     
-            
     mix_node = inkdrop_group.nodes.new(type= 'CompositorNodeMixRGB')
     mix_node.location = 400,150
     mix_node.hide = True
@@ -1445,53 +877,32 @@ def create_inkdrop_group(context, operator, group_name):
     inv_node.location = 200,0
     inv_node.hide = True
     
-    
-    #link nodes together
-         
     inkdrop_group.links.new(rgbtobw_node.outputs[0], mix_node.inputs[0])
-    
     inkdrop_group.links.new(inv_node.outputs[0], mix_node.inputs[1])
-    
     inkdrop_group.links.new(mix_node.outputs[0], rgb_node.inputs[1])
     
-    # link inputs
-    
     inkdrop_group.links.new(group_inputs.outputs['Smoke Movie Clip'], rgbtobw_node.inputs[0])
-    
     inkdrop_group.links.new(group_inputs.outputs['Black and White Text Image'], inv_node.inputs[0])
     
-    
-        #link output
     inkdrop_group.links.new(rgb_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return inkdrop_group
 
 
-# Create compositor group Patch 
 def create_patch_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
     
-    
-    
-    # Create a group
     patch_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
-    
-    # Create group inputs
-    
 
     group_inputs = patch_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
     
-    
-    # create group inputs
     group_inputs = patch_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
+    
     patch_group.inputs.new('NodeSocketFloat','Patch Mask')
     patch_group.inputs.new('NodeSocketFloat','Garbage Mask')
     patch_group.inputs.new('NodeSocketColor','Background Movie Clip')
@@ -1502,11 +913,8 @@ def create_patch_group(context, operator, group_name):
     patch_group.inputs.new('NodeSocketFloat','Scale')
     patch_group.inputs.new('NodeSocketFloat','Perspective X')
     patch_group.inputs.new('NodeSocketFloat','Perspective Y')
-    
     patch_group.inputs.new('NodeSocketFloat','Patch Feather')
-    
     patch_group.inputs.new('NodeSocketFloat','Garbage Feather')
-    
     patch_group.inputs.new('NodeSocketFloat','Track Pos Input X')
     patch_group.inputs.new('NodeSocketFloat','Track Pos Input Y')
     patch_group.inputs[7].default_value = 1
@@ -1515,14 +923,9 @@ def create_patch_group(context, operator, group_name):
     patch_group.inputs[1].default_value = 1
     patch_group.inputs[1].default_value = 0    
     
-    
-    
-    # Create group outputs
     group_outputs = patch_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2800,400)
     patch_group.outputs.new('NodeSocketColor','Output')
-
-    #nodes to be added to group
         
     rerout1_node = patch_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
@@ -1548,8 +951,6 @@ def create_patch_group(context, operator, group_name):
     rerout8_node = patch_group.nodes.new(type= 'NodeReroute')
     rerout8_node.location = 0,800
     
-
-    
     transf1_node = patch_group.nodes.new(type= 'CompositorNodeTransform')
     transf1_node.location = 200,500
     transf1_node.label = "Patch Mask Transform"
@@ -1558,7 +959,6 @@ def create_patch_group(context, operator, group_name):
     transf1_node.inputs[2].name = "Position Y"
     transf1_node.inputs[3].name = "Rotation"
     transf1_node.hide = True 
-    
     
     transf2_node = patch_group.nodes.new(type= 'CompositorNodeTransform')
     transf2_node.location = 200,200
@@ -1578,7 +978,6 @@ def create_patch_group(context, operator, group_name):
     scale2_node.location = 400,200
     scale2_node.label = "Movie Perspective Scale"
     scale2_node.hide = True 
-    
     
     transl1_node = patch_group.nodes.new(type= 'CompositorNodeTranslate')
     transl1_node.location = 600,500
@@ -1619,126 +1018,66 @@ def create_patch_group(context, operator, group_name):
     mix1_node.location = 1300,0
     mix1_node.hide = True
     
-    
-     #link nodes together
-
     patch_group.links.new(transf1_node.outputs[0], scale1_node.inputs[0])
-    
     patch_group.links.new(scale1_node.outputs[0], transl1_node.inputs[0])
-    
     patch_group.links.new(transl1_node.outputs[0], blur1_node.inputs[0])
-    
     patch_group.links.new(transf2_node.outputs[0], scale2_node.inputs[0])
-    
     patch_group.links.new(scale2_node.outputs[0], transl2_node.inputs[0])
-    
     patch_group.links.new(transl2_node.outputs[0], mix1_node.inputs[2])
-    
     patch_group.links.new(blur1_node.outputs[0], math1_node.inputs[0])
-    
     patch_group.links.new(blur2_node.outputs[0], math1_node.inputs[1])
-        
     patch_group.links.new(math1_node.outputs[0], mix1_node.inputs[0])
-    
     patch_group.links.new(rerout1_node.outputs[0], transf1_node.inputs[1])
-    
     patch_group.links.new(rerout1_node.outputs[0], transf2_node.inputs[1])
-    
     patch_group.links.new(rerout2_node.outputs[0], transf1_node.inputs[2])
-    
     patch_group.links.new(rerout2_node.outputs[0], transf2_node.inputs[2])
-    
     patch_group.links.new(rerout3_node.outputs[0], transf1_node.inputs[3])
-    
     patch_group.links.new(rerout3_node.outputs[0], transf2_node.inputs[3])
-    
     patch_group.links.new(rerout4_node.outputs[0], transf1_node.inputs[4])
-    
     patch_group.links.new(rerout4_node.outputs[0], transf2_node.inputs[4])
-    
     patch_group.links.new(rerout5_node.outputs[0], scale1_node.inputs[1])
-    
     patch_group.links.new(rerout5_node.outputs[0], scale2_node.inputs[1])
-    
     patch_group.links.new(rerout6_node.outputs[0], scale1_node.inputs[2])
-    
     patch_group.links.new(rerout6_node.outputs[0], scale2_node.inputs[2])
-    
     patch_group.links.new(rerout7_node.outputs[0], transl1_node.inputs[1])
-    
     patch_group.links.new(rerout7_node.outputs[0], transl2_node.inputs[1])
-    
     patch_group.links.new(rerout8_node.outputs[0], transl1_node.inputs[2])
-    
     patch_group.links.new(rerout8_node.outputs[0], transl2_node.inputs[2])
 
-    
-    
-    # link inputs
     patch_group.links.new(group_inputs.outputs['Patch Mask'], transf1_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Garbage Mask'], blur2_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Background Movie Clip'], mix1_node.inputs[1])
-    
     patch_group.links.new(group_inputs.outputs['Patch Movie Clip'], transf2_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Position X'], rerout1_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Position Y'], rerout2_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Rotation'], rerout3_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Scale'], rerout4_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Perspective X'], rerout5_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Perspective Y'], rerout6_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Track Pos Input X'], rerout7_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Track Pos Input Y'], rerout8_node.inputs[0])
-    
     patch_group.links.new(group_inputs.outputs['Patch Feather'], blur1_node.inputs[1])
-    
     patch_group.links.new(group_inputs.outputs['Garbage Feather'], blur2_node.inputs[1])
     
-    
-        #link output
     patch_group.links.new(mix1_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return patch_group
 
 
-
-
-
-
-# Create compositor group Marker Removal 
 def create_markerrem_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
     
-    
-    
-    # Create a group
     markerrem_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
-    
-    # Create group inputs
-    
 
     group_inputs = markerrem_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
     
-    
-    # create group inputs
     group_inputs = markerrem_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
+    
     markerrem_group.inputs.new('NodeSocketFloat','Marker Removal Mask')
     markerrem_group.inputs.new('NodeSocketColor','Movie Clip')
     markerrem_group.inputs.new('NodeSocketFloat','Position X')
@@ -1746,26 +1085,18 @@ def create_markerrem_group(context, operator, group_name):
     markerrem_group.inputs.new('NodeSocketFloat','Marker Feather')
     markerrem_group.inputs.new('NodeSocketFloat','Brightness')
     markerrem_group.inputs.new('NodeSocketFloat','Saturation')
-    
     markerrem_group.inputs[2].default_value = 0
     markerrem_group.inputs[3].default_value = 0
     markerrem_group.inputs[4].default_value = 0 
     markerrem_group.inputs[5].default_value = 1 
     markerrem_group.inputs[6].default_value = 1  
     
-    
-    
-    # Create group outputs
     group_outputs = markerrem_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2800,400)
     markerrem_group.outputs.new('NodeSocketColor','Output')
 
-    #nodes to be added to group
-        
     rerout1_node = markerrem_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
-    
-    
     
     blur1_node = markerrem_group.nodes.new(type= 'CompositorNodeBlur')
     blur1_node.location = 200,500
@@ -1792,139 +1123,66 @@ def create_markerrem_group(context, operator, group_name):
     mix1_node.location = 600,0
     mix1_node.hide = True
     
-    
-    
-    
-    
-     #link nodes together
-     
     markerrem_group.links.new(rerout1_node.outputs[0], mix1_node.inputs[1])
     markerrem_group.links.new(rerout1_node.outputs[0], hue_node.inputs[0])
     markerrem_group.links.new(blur1_node.outputs[0], mix1_node.inputs[0])
     markerrem_group.links.new(hue_node.outputs[0], trans_node.inputs[0])
     markerrem_group.links.new(trans_node.outputs[0], mix1_node.inputs[2])
 
-    
-    
-    # link inputs
     markerrem_group.links.new(group_inputs.outputs['Marker Removal Mask'], blur1_node.inputs[0])
-    
-    
     markerrem_group.links.new(group_inputs.outputs['Movie Clip'], rerout1_node.inputs[0])
-    
     markerrem_group.links.new(group_inputs.outputs['Position X'], trans_node.inputs[1])
-    
     markerrem_group.links.new(group_inputs.outputs['Position Y'], trans_node.inputs[2])
-    
-    
     markerrem_group.links.new(group_inputs.outputs['Marker Feather'], blur1_node.inputs[1])
-    
     markerrem_group.links.new(group_inputs.outputs['Brightness'], hue_node.inputs[3])
-    
     markerrem_group.links.new(group_inputs.outputs['Saturation'], hue_node.inputs[2])
-    
-    
-    
-    
-        #link output
+
     markerrem_group.links.new(mix1_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return markerrem_group
 
 
-
-
-
-
-
-
-# Create compositor group Transition Node 
 def create_transition_group(context, operator, group_name):
-    
-    
     
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    
-    
-    # Create a group
     transition_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    
-    
-    # create group inputs
     group_inputs = transition_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
     
     transition_group.inputs.new('NodeSocketFloatFactor','Transition Factor')
     transition_group.inputs.new('NodeSocketColor','Original Video Clip')
     transition_group.inputs.new('NodeSocketColor','Edited Video Clip')
-    
-    
-    
     transition_group.inputs[0].default_value = 0
     transition_group.inputs[0].min_value = 0
     transition_group.inputs[0].max_value = 1
     
-    
-    
-    
-    # Create group outputs
     group_outputs = transition_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (600,400)
     transition_group.outputs.new('NodeSocketColor','Output')
-
-    #nodes to be added to group
         
     mix1_node = transition_group.nodes.new(type= 'CompositorNodeMixRGB')
     mix1_node.location = 200,400
     mix1_node.use_clamp = True
     
-    
-    
-    # link inputs
     transition_group.links.new(group_inputs.outputs['Transition Factor'], mix1_node.inputs[0])
-    
-    
     transition_group.links.new(group_inputs.outputs['Edited Video Clip'], mix1_node.inputs[1])
-    
     transition_group.links.new(group_inputs.outputs['Original Video Clip'], mix1_node.inputs[2])
-    
-    
-    
-    
-    
-    
-        #link output
+
     transition_group.links.new(mix1_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return transition_group
 
 
-
-
-
-
-
-
-
-
-# Create compositor group posterize 1
 def create_post1_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
     
-    # Create a group
     post1_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # create group inputs
     group_inputs = post1_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     
@@ -1936,12 +1194,9 @@ def create_post1_group(context, operator, group_name):
     post1_group.inputs[2].default_value = 1.3
     post1_group.inputs[3].default_value = 9
     
-    # create group outputs
     group_outputs = post1_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2000,0)
     post1_group.outputs.new('NodeSocketColor','Output')
-    
-        #nodes to be added to group
         
     rerout1_node = post1_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
@@ -1969,51 +1224,33 @@ def create_post1_group(context, operator, group_name):
     mix_node = post1_group.nodes.new(type= 'CompositorNodeMixRGB')
     mix_node.location = 1000,0
     mix_node.blend_type = 'SOFT_LIGHT'
-    
-    
-        #link nodes together
      
     post1_group.links.new(rerout1_node.outputs[0], math1_node.inputs[0])
-    
     post1_group.links.new(rerout1_node.outputs[0], mix_node.inputs[2])
-    
     post1_group.links.new(math1_node.outputs[0], math2_node.inputs[0]) 
-    
     post1_group.links.new(math2_node.outputs[0], math3_node.inputs[0]) 
-    
     post1_group.links.new(math3_node.outputs[0], math4_node.inputs[0]) 
-    
     post1_group.links.new(math4_node.outputs[0], mix_node.inputs[1])
-    
-    # link inputs
     
     post1_group.links.new(group_inputs.outputs['Movie Clip'], rerout1_node.inputs[0])
     post1_group.links.new(group_inputs.outputs['Value 1'], math1_node.inputs[1])
     post1_group.links.new(group_inputs.outputs['Value 2'], math2_node.inputs[1])
     post1_group.links.new(group_inputs.outputs['Value 3'], math4_node.inputs[1])
     
-    #link output
     post1_group.links.new(mix_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return post1_group
-
-
 
 
 # Create compositor group posterize 2
 def create_post2_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
     
-    # Create a group
     post2_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-     # create group inputs
     group_inputs = post2_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     
@@ -2025,12 +1262,9 @@ def create_post2_group(context, operator, group_name):
     post2_group.inputs[2].default_value = 0.2
     post2_group.inputs[3].default_value = 9
     
-    # create group outputs
     group_outputs = post2_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2000,0)
     post2_group.outputs.new('NodeSocketColor','Output')
-    
-        #nodes to be added to group
         
     rerout1_node = post2_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
@@ -2058,57 +1292,29 @@ def create_post2_group(context, operator, group_name):
     mix_node = post2_group.nodes.new(type= 'CompositorNodeMixRGB')
     mix_node.location = 1000,0
     mix_node.blend_type = 'ADD'
-    
-    
-        #link nodes together
      
     post2_group.links.new(rerout1_node.outputs[0], math1_node.inputs[0])
-    
     post2_group.links.new(rerout1_node.outputs[0], mix_node.inputs[2])
-    
     post2_group.links.new(math1_node.outputs[0], math2_node.inputs[0]) 
-    
     post2_group.links.new(math2_node.outputs[0], math3_node.inputs[0]) 
-    
     post2_group.links.new(math3_node.outputs[0], math4_node.inputs[0]) 
-    
     post2_group.links.new(math4_node.outputs[0], mix_node.inputs[1])
-    
-    # link inputs
     
     post2_group.links.new(group_inputs.outputs['Movie Clip'], rerout1_node.inputs[0])
     post2_group.links.new(group_inputs.outputs['Value 1'], math1_node.inputs[1])
     post2_group.links.new(group_inputs.outputs['Value 2'], math2_node.inputs[1])
     post2_group.links.new(group_inputs.outputs['Value 3'], math4_node.inputs[1])
     
-    #link output
     post2_group.links.new(mix_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return post2_group
 
 
-
-
-    
-
-
-
-
-
-
-
-
-# Create compositor group posterize 3
 def create_post3_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
-    # Create a group
     post3_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-     # create group inputs
     group_inputs = post3_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     
@@ -2120,12 +1326,9 @@ def create_post3_group(context, operator, group_name):
     post3_group.inputs[2].default_value = 0.5
     post3_group.inputs[3].default_value = 5
     
-    # create group outputs
     group_outputs = post3_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2000,0)
     post3_group.outputs.new('NodeSocketColor','Output')
-    
-        #nodes to be added to group
         
     rerout1_node = post3_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
@@ -2153,57 +1356,34 @@ def create_post3_group(context, operator, group_name):
     mix_node = post3_group.nodes.new(type= 'CompositorNodeMixRGB')
     mix_node.location = 1000,0
     mix_node.blend_type = 'COLOR'
-    
-       
-    
-        #link nodes together
      
     post3_group.links.new(rerout1_node.outputs[0], math1_node.inputs[0])
-    
     post3_group.links.new(rerout1_node.outputs[0], mix_node.inputs[2])
-    
     post3_group.links.new(math1_node.outputs[0], math2_node.inputs[0]) 
-    
     post3_group.links.new(math2_node.outputs[0], math3_node.inputs[0]) 
-    
     post3_group.links.new(math3_node.outputs[0], math4_node.inputs[0]) 
-    
     post3_group.links.new(math4_node.outputs[0], mix_node.inputs[1])
-    
-        # link inputs
     
     post3_group.links.new(group_inputs.outputs['Movie Clip'], rerout1_node.inputs[0])
     post3_group.links.new(group_inputs.outputs['Value 1'], math1_node.inputs[1])
     post3_group.links.new(group_inputs.outputs['Value 2'], math2_node.inputs[1])
     post3_group.links.new(group_inputs.outputs['Value 3'], math4_node.inputs[1])
-    
-        #link output
+
     post3_group.links.new(mix_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return post3_group
 
 
-# Create compositor group Scifi Eyes
 def create_scifieye_group(context, operator, group_name):
-    
-    #set render res to 100
+
     bpy.context.scene.render.resolution_percentage = 100  
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-    
-    
-    
-    
-    
-    # Create a group
     scifieye_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
 
-    # Create group inputs
     group_inputs = scifieye_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-500,400)
+    
     scifieye_group.inputs.new('NodeSocketFloat','Eye Lid Mask')
     scifieye_group.inputs.new('NodeSocketFloat','Shadow Mask')
     scifieye_group.inputs.new('NodeSocketColor','Movie Clip')
@@ -2231,19 +1411,10 @@ def create_scifieye_group(context, operator, group_name):
     scifieye_group.inputs[12].min_value = 0
     scifieye_group.inputs[12].default_value = 0
     
-    
-        
-
-    # Create group outputs
     group_outputs = scifieye_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2000,400)
     scifieye_group.outputs.new('NodeSocketColor','Output')
-    
-    
-    
-
-    #nodes to be added to group
-        
+ 
     rerout1_node = scifieye_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
     
@@ -2252,7 +1423,6 @@ def create_scifieye_group(context, operator, group_name):
     
     rerout3_node = scifieye_group.nodes.new(type= 'NodeReroute')
     rerout3_node.location = 50,500
-    
     
     transf1_node = scifieye_group.nodes.new(type= 'CompositorNodeTransform')
     transf1_node.location = 180,150
@@ -2298,7 +1468,6 @@ def create_scifieye_group(context, operator, group_name):
     alphaover1_node.use_premultiply = True
     alphaover1_node.hide = True
     alphaover1_node.label = "Alpha 1"
-    
         
     alphaover2_node = scifieye_group.nodes.new(type= 'CompositorNodeAlphaOver')
     alphaover2_node.location = 1000,300
@@ -2320,141 +1489,72 @@ def create_scifieye_group(context, operator, group_name):
     blur2_node.label = "Shadow Feather"
     blur2_node.hide = True
     
-    
-    
     alphaover3_node = scifieye_group.nodes.new(type= 'CompositorNodeAlphaOver')
     alphaover3_node.location = 1350,300
     alphaover3_node.inputs[2].default_value = (0, 0, 0, 0.5)
     alphaover3_node.label = "Shadow"
     alphaover3_node.hide = True
-    
-    
-    
-    #link nodes together
-    
         
     scifieye_group.links.new(transf1_node.outputs[0], translate1_node.inputs[0])
-    
     scifieye_group.links.new(translate1_node.outputs[0], alphaover1_node.inputs[2])
-    
-    
     scifieye_group.links.new(transf2_node.outputs[0], translate2_node.inputs[0])
-    
     scifieye_group.links.new(translate2_node.outputs[0], alphaover2_node.inputs[2])
-    
     scifieye_group.links.new(alphaover1_node.outputs[0], alphaover2_node.inputs[1])
-    
-    
     scifieye_group.links.new(alphaover2_node.outputs[0], alphaover3_node.inputs[1])
-    
-        
     scifieye_group.links.new(rerout1_node.outputs[0], transf1_node.inputs[0])
-    
     scifieye_group.links.new(rerout1_node.outputs[0], transf2_node.inputs[0])
-
-     
     scifieye_group.links.new(rerout2_node.outputs[0], alphaover1_node.inputs[0])
-     
     scifieye_group.links.new(rerout2_node.outputs[0], alphaover2_node.inputs[0])
-    
     scifieye_group.links.new(rgb1_node.outputs[0], alphaover1_node.inputs[1])
-    
     scifieye_group.links.new(rerout2_node.outputs[0], rgb1_node.inputs[0])
-    
     scifieye_group.links.new(blur1_node.outputs[0], rerout2_node.inputs[0])
-    
     scifieye_group.links.new(rerout2_node.outputs[0], math1_node.inputs[1])
-    
     scifieye_group.links.new(math1_node.outputs[0], blur2_node.inputs[0])
-    
     scifieye_group.links.new(blur2_node.outputs[0], alphaover3_node.inputs[0])
-    
     scifieye_group.links.new(inv1_node.outputs[0], rgb1_node.inputs[3])
     
-    
-    
-    
-    
-
-
-
-
-        # link inputs
     scifieye_group.links.new(group_inputs.outputs['Eye Image'], rerout1_node.inputs[0])
-    
     scifieye_group.links.new(group_inputs.outputs['Movie Clip'], rgb1_node.inputs[1])
-    
     scifieye_group.links.new(group_inputs.outputs['Eye Lid Mask'], blur1_node.inputs[0])
-    
     scifieye_group.links.new(group_inputs.outputs['Shadow Mask'], math1_node.inputs[0])
-    scifieye_group.links.new(group_inputs.outputs['Shadow Feather'], blur2_node.inputs[1])
-        
+    scifieye_group.links.new(group_inputs.outputs['Shadow Feather'], blur2_node.inputs[1]) 
     scifieye_group.links.new(group_inputs.outputs['Left Eye (Track Pos X)'], translate1_node.inputs[1])
-    
     scifieye_group.links.new(group_inputs.outputs['Left Eye (Track Pos Y)'], translate1_node.inputs[2])
-    
     scifieye_group.links.new(group_inputs.outputs['Right Eye (Track Pos X)'], translate2_node.inputs[1])
-    
     scifieye_group.links.new(group_inputs.outputs['Right Eye (Track Pos Y)'], translate2_node.inputs[2])
-    
     scifieye_group.links.new(group_inputs.outputs['Left Eye: X'], transf1_node.inputs[1])
-    
     scifieye_group.links.new(group_inputs.outputs['Left Eye: Y'], transf1_node.inputs[2])
-    
     scifieye_group.links.new(group_inputs.outputs['Right Eye: X'], transf2_node.inputs[1])
-    
     scifieye_group.links.new(group_inputs.outputs['Right Eye: Y'], transf2_node.inputs[2])
-    
     scifieye_group.links.new(group_inputs.outputs['Left Eye: Rotation'], transf1_node.inputs[3])
-    
     scifieye_group.links.new(group_inputs.outputs['Right Eye: Rotation'], transf2_node.inputs[3])
-    
     scifieye_group.links.new(group_inputs.outputs['Left Eye: Scale'], transf1_node.inputs[4])
-    
     scifieye_group.links.new(group_inputs.outputs['Right Eye: Scale'], transf2_node.inputs[4])
-    
     scifieye_group.links.new(group_inputs.outputs['Eyeball Brightness'], inv1_node.inputs[1])
-    
     scifieye_group.links.new(group_inputs.outputs['Eye Mask Feather'], blur1_node.inputs[1])
    
-   
-   
-    
-    #link output
     scifieye_group.links.new(alphaover3_node.outputs[0], group_outputs.inputs['Output'])
     
-    
-
-    # return the group
     return scifieye_group
 
 
-# Create compositor group color presets
 def create_colpre_group(context, operator, group_name):
     
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-        
-    # Create a group
     colpre_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # create group inputs
     group_inputs = colpre_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     
-        
-    # create group outputs
     group_outputs = colpre_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (200,0)
+    
     colpre_group.outputs.new('NodeSocketColor','Natural White')
     colpre_group.outputs.new('NodeSocketColor','Slightly Aged')
     colpre_group.outputs.new('NodeSocketColor','Parchment 1')
     colpre_group.outputs.new('NodeSocketColor','Parchment 2')
     
-    
-       #nodes to be added to group
-        
     natwhite_node = colpre_group.nodes.new(type= 'CompositorNodeRGB')
     natwhite_node.location = 0,200
     natwhite_node.location = 0,200
@@ -2476,63 +1576,35 @@ def create_colpre_group(context, operator, group_name):
     parch2_node.outputs[0].default_value = (0.879623, 0.879623, 0.658375, 1)
     parch2_node.hide = True
     
-    
-    
-        #link output
     colpre_group.links.new(natwhite_node.outputs[0], group_outputs.inputs['Natural White'])
-    
     colpre_group.links.new(aged_node.outputs[0], group_outputs.inputs['Slightly Aged'])
-    
     colpre_group.links.new(parch1_node.outputs[0], group_outputs.inputs['Parchment 1'])
-    
     colpre_group.links.new(parch2_node.outputs[0], group_outputs.inputs['Parchment 2'])
 
-    # return the group
     return colpre_group
 
 
-
-
-
-
-# Create compositor group sketch
 def create_sketch_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100  
-    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
-        
-    # Create a group
     sketch_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-    # create group inputs
     group_inputs = sketch_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,400)
     
     sketch_group.inputs.new('NodeSocketColor','Movie Clip')
-    
     sketch_group.inputs.new('NodeSocketFloat','Sketch Amount')
-    
     sketch_group.inputs.new('NodeSocketFloat','Paper Image')
-    
     sketch_group.inputs.new('NodeSocketColor','Paper Color')
-    
-    
     sketch_group.inputs[2].default_value = 1
     sketch_group.inputs[3].default_value = (1, 1, 1, 1)
 
-    
-    # create group outputs
     group_outputs = sketch_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (2000,0)
     sketch_group.outputs.new('NodeSocketColor','Output')
     
-    
-        #nodes to be added to group
-        
     rerout1_node = sketch_group.nodes.new(type= 'NodeReroute')
     rerout1_node.location = 0,0
     
@@ -2548,9 +1620,6 @@ def create_sketch_group(context, operator, group_name):
     scale2_node.space = 'RENDER_SIZE'
     scale2_node.hide = True
     
-    
-    
-    
     rgbbw_node = sketch_group.nodes.new(type= 'CompositorNodeRGBToBW')
     rgbbw_node.location = 200,-100
     rgbbw_node.hide = True
@@ -2565,7 +1634,6 @@ def create_sketch_group(context, operator, group_name):
     blur1_node.size_y = 1
     blur1_node.hide = True
     blur1_node.filter_type = 'FAST_GAUSS'
-
     
     rgb_node = sketch_group.nodes.new(type= 'CompositorNodeCurveRGB')
     rgb_node.location = 900,-250
@@ -2593,63 +1661,34 @@ def create_sketch_group(context, operator, group_name):
     mix4_node.blend_type = 'MULTIPLY'
     mix4_node.use_clamp = True
     mix4_node.label = "Mix4 col"
-    
-    
-    
-     #link nodes together
      
     sketch_group.links.new(rerout1_node.outputs[0], rgbbw_node.inputs[0]) 
-    
     sketch_group.links.new(scale1_node.outputs[0], mix3_node.inputs[2])
-    
     sketch_group.links.new(rerout1_node.outputs[0], mix1_node.inputs[1]) 
-
-    
     sketch_group.links.new(rgbbw_node.outputs[0], inv_node.inputs[1])
-    
     sketch_group.links.new(mix1_node.outputs[0], mix2_node.inputs[1])
-    
     sketch_group.links.new(inv_node.outputs[0], blur1_node.inputs[0])
-    
     sketch_group.links.new(blur1_node.outputs[0], rgb_node.inputs[1])
-    
     sketch_group.links.new(rgb_node.outputs[0], mix2_node.inputs[2])
-    
     sketch_group.links.new(mix2_node.outputs[0], mix3_node.inputs[1])
-    
     sketch_group.links.new(mix3_node.outputs[0], mix4_node.inputs[1])
-    
     sketch_group.links.new(scale2_node.outputs[0], mix4_node.inputs[2])
     
-    
-    # link inputs
-    
     sketch_group.links.new(group_inputs.outputs['Movie Clip'], rerout1_node.inputs[0])
-    
     sketch_group.links.new(group_inputs.outputs['Paper Image'], scale1_node.inputs[0])
-    
     sketch_group.links.new(group_inputs.outputs['Sketch Amount'], blur1_node.inputs[1])
-    
     sketch_group.links.new(group_inputs.outputs['Paper Color'], scale2_node.inputs[0])
     
-    
-        #link output
     sketch_group.links.new(mix4_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return sketch_group
 
 
-# Create compositor group vignette
 def create_vig_group(context, operator, group_name):
     
-    #set render res to 100
     bpy.context.scene.render.resolution_percentage = 100
-    
-    # Create a group
     create_vig_group = bpy.data.node_groups.new(group_name, 'CompositorNodeTree')
     
-     # create group inputs
     group_inputs = create_vig_group.nodes.new('NodeGroupInput')
     group_inputs.location = (-200,0)
     
@@ -2671,12 +1710,9 @@ def create_vig_group(context, operator, group_name):
     create_vig_group.inputs[7].default_value = 1
     create_vig_group.inputs[8].default_value = 1
     
-    # create group outputs
     group_outputs = create_vig_group.nodes.new('NodeGroupOutput')
     group_outputs.location = (1000,0)
     create_vig_group.outputs.new('NodeSocketColor','Output')
-    
-        #nodes to be added to group
         
     elip_node = create_vig_group.nodes.new(type= 'CompositorNodeEllipseMask')
     elip_node.location = -100,400
@@ -2688,18 +1724,14 @@ def create_vig_group(context, operator, group_name):
     scale_node.location = 0,0
     scale_node.hide = True
     
-
-    
     transf_node = create_vig_group.nodes.new(type= 'CompositorNodeTransform')
     transf_node.location = 200,0
     transf_node.hide = True
     
-    
     inv_node = create_vig_group.nodes.new(type= 'CompositorNodeInvert')
     inv_node.location = 400,0
     inv_node.hide = True
-    
-    
+
     blur_node = create_vig_group.nodes.new(type= 'CompositorNodeBlur')
     blur_node.location = 600,0
     blur_node.size_x = 1
@@ -2707,29 +1739,17 @@ def create_vig_group(context, operator, group_name):
     blur_node.filter_type = 'FAST_GAUSS'
     blur_node.hide = True
 
-    
     alp_node = create_vig_group.nodes.new(type= 'CompositorNodeAlphaOver')
     alp_node.location = 800,0
     alp_node.use_premultiply = True
     alp_node.hide = True
-    
-    
-    
-       
-    
-        #link nodes together
-     
+
     create_vig_group.links.new(elip_node.outputs[0], scale_node.inputs[0])
     create_vig_group.links.new(scale_node.outputs[0], transf_node.inputs[0])
     create_vig_group.links.new(transf_node.outputs[0], inv_node.inputs[1])
     create_vig_group.links.new(inv_node.outputs[0], blur_node.inputs[0])
-    
     create_vig_group.links.new(blur_node.outputs[0], alp_node.inputs[0])
-    
-    
-        
-        # link inputs
-    
+
     create_vig_group.links.new(group_inputs.outputs['Movie Clip'], alp_node.inputs[1])
     create_vig_group.links.new(group_inputs.outputs['Position X'], transf_node.inputs[1])
     create_vig_group.links.new(group_inputs.outputs['Position Y'], transf_node.inputs[2])
@@ -2740,36 +1760,17 @@ def create_vig_group(context, operator, group_name):
     create_vig_group.links.new(group_inputs.outputs['Perspective X'], scale_node.inputs[1])
     create_vig_group.links.new(group_inputs.outputs['Perspective Y'], scale_node.inputs[2])
     
-    
-        #link output
     create_vig_group.links.new(alp_node.outputs[0], group_outputs.inputs['Output'])
 
-    # return the group
     return create_vig_group
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
- #context for addition1 (eye col change)
 def addition1(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree
-    
     bpy.context.scene.render.resolution_percentage = 100 
     
-    
-    #outside group nodes
     mov_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov_node.location = -200,0
     mov_node.select = False
@@ -2788,8 +1789,7 @@ def addition1(context):
     garbmask_node.location = -400,-220
     garbmask_node.label = "Garbage Mask"
     garbmask_node.select = False   
-    
-                
+      
     comp_node = tree.nodes.new(type= 'CompositorNodeComposite')
     comp_node.location = 500,-200
     comp_node.select = False
@@ -2797,24 +1797,18 @@ def addition1(context):
     view_node = tree.nodes.new(type= 'CompositorNodeViewer')
     view_node.location = 500,0
     view_node.select = False
-         
-    #connections bewteen nodes
+
     links = tree.links
-    
     link = links.new(mov_node.outputs[0], comp_node.inputs[0])
-    
     link = links.new(mov_node.outputs[0], view_node.inputs[0])
     
     
-#context for addition2 (scifi eyes)
 def addition2(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree    
-    
     bpy.context.scene.render.resolution_percentage = 100 
-
-
-    #nodes outside group    
+ 
     mov_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov_node.location = -200,0
     mov_node.select = False
@@ -2853,25 +1847,17 @@ def addition2(context):
     view_node.location = 1000,100
     view_node.select = False
     
-    
-    #connections bewteen nodes
-    
     links = tree.links
-    
     link = links.new(mov_node.outputs[0], comp_node.inputs[0])
-    
     link = links.new(mov_node.outputs[0], view_node.inputs[0])
 
 
-
-    #context for addition3 (Patch)
 def addition3(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
 
-     #nodes to be added outside group
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = 0,100
     mov1_node.select = False
@@ -2892,7 +1878,6 @@ def addition3(context):
     trackpos1_node.select = False
     trackpos1_node.label = "Track Position"
     
-    
     comp_node = tree.nodes.new(type= 'CompositorNodeComposite')
     comp_node.location = 1000,-100
     comp_node.select = False
@@ -2901,37 +1886,27 @@ def addition3(context):
     view_node.location = 1000,100
     view_node.select = False
     
-    
-    
-    #connections bewteen nodes
     links = tree.links
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
-    
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])
 
 
-
-    #context for addition4 (Clone)
 def addition4(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
     
-     #nodes to be added outside group
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = 400,100
     mov1_node.select = False
     mov1_node.label = "Background Movie Clip"   
     
-       
     mask1_node = tree.nodes.new(type= 'CompositorNodeMask')
     mask1_node.location = 200,100
     mask1_node.select = False 
     mask1_node.label = "Clone Mask"
     
-        
     comp_node = tree.nodes.new(type= 'CompositorNodeComposite')
     comp_node.location = 1000,-100
     comp_node.select = False
@@ -2940,25 +1915,16 @@ def addition4(context):
     view_node.location = 1000,100
     view_node.select = False
     
-    
-    
-    #connections bewteen nodes
     links = tree.links
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
-    
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])
 
-
-
-    #context for addition5 (glitch)
 def addition5(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
     
-    #nodes to be added outside of group
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = -200,400
     mov1_node.select = False
@@ -2976,22 +1942,17 @@ def addition5(context):
     view_node.location = 700,400
     view_node.select = False
     
-    #connections bewteen nodes
     links = tree.links
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])
 
 
-
-    #context for addition6 (sketch)
 def addition6(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
     
-    #nodes to be added outisde of the group 
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = -100,400
     mov1_node.select = False 
@@ -3000,9 +1961,7 @@ def addition6(context):
     img1_node.location = -300,400
     img1_node.select = False
     img1_node.label = "Paper Image"    
-       
     
-         
     comp_node = tree.nodes.new(type= 'CompositorNodeComposite')
     comp_node.location = 900,200
     comp_node.select = False
@@ -3011,26 +1970,17 @@ def addition6(context):
     view_node.location = 900,400
     view_node.select = False
     
-    #connections bewteen nodes
     links = tree.links
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
-    
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])
     
-    
-    
-    
-    
-    #context for addition7 (post)
+
 def addition7(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
-    
-    
-    #nodes to be added 
+
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = 0,400
     mov1_node.select = False 
@@ -3044,23 +1994,16 @@ def addition7(context):
     view_node.select = False
     
     links = tree.links
-    
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
-    
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])
     
     
-    
-    #context for addition8 (ink drop)
 def addition8(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
     
-    
-    #nodes to be added outside of group
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = 400,400
     mov1_node.select = False 
@@ -3079,26 +2022,17 @@ def addition8(context):
     view_node.location = 1000,400
     view_node.select = False
 
-
-
     links = tree.links
-    
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
-  
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])
     
-    
 
-#context for addition9 (Marker Removal)
 def addition9(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
-    
     bpy.context.scene.render.resolution_percentage = 100 
     
-    
-    #nodes to be added outside of group
     mov1_node = tree.nodes.new(type= 'CompositorNodeMovieClip')
     mov1_node.location = 300,-500
     mov1_node.select = False 
@@ -3117,48 +2051,21 @@ def addition9(context):
     view_node.location = 1000,-650
     view_node.select = False
 
-
-
     links = tree.links
-    
-    
     link = links.new(mov1_node.outputs[0], comp_node.inputs[0])
-  
     link = links.new(mov1_node.outputs[0], view_node.inputs[0])    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
-
-
-
-
-
- #Context for remove  nodes
 def rem(context):
+    
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree 
     
-    
-    #removes unwanted nodes
     for node in tree.nodes:
         tree.nodes.remove(node)
         
-        
-        
-        
- #operation to add remove Nodes   
-class RemOP(bpy.types.Operator):
+  
+class RemOP(Operator):
     """Click this Button to remove the Nodes from the Compositor Window"""
     bl_idname = "rem.addnodes"
     bl_label = " Remove Nodes"
@@ -3167,16 +2074,8 @@ class RemOP(bpy.types.Operator):
         rem(context)
         return {'FINISHED'}
 
-
-
-
-
-
-
-
-
-    #operation to addition1 (eyecol)  
-class Addition1OP(bpy.types.Operator):
+ 
+class Addition1OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip, Masks and Output."""
     bl_idname = "addition1.addnodes"
     bl_label = " Additional Nodes"
@@ -3184,10 +2083,9 @@ class Addition1OP(bpy.types.Operator):
     def execute(self, context):
         addition1(context)
         return {'FINISHED'}  
-    
-    
-    #operation to addition2 (scifi eyes)  
-class Addition2OP(bpy.types.Operator):
+
+
+class Addition2OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip, Masks, Image and Output."""
     bl_idname = "addition2.addnodes"
     bl_label = " Additional Nodes"
@@ -3196,8 +2094,8 @@ class Addition2OP(bpy.types.Operator):
         addition2(context)
         return {'FINISHED'} 
     
-    #operation to addition3 (patch)  
-class Addition3OP(bpy.types.Operator):
+ 
+class Addition3OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clips, Masks and Output."""
     bl_idname = "addition3.addnodes"
     bl_label = " Additional Nodes"
@@ -3206,8 +2104,8 @@ class Addition3OP(bpy.types.Operator):
         addition3(context)
         return {'FINISHED'} 
     
-    #operation to addition4 (clone)  
-class Addition4OP(bpy.types.Operator):
+  
+class Addition4OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip, Masks and Output."""
     bl_idname = "addition4.addnodes"
     bl_label = " Additional Nodes"
@@ -3216,8 +2114,8 @@ class Addition4OP(bpy.types.Operator):
         addition4(context)
         return {'FINISHED'} 
     
-    #operation to addition5 (glitch)  
-class Addition5OP(bpy.types.Operator):
+  
+class Addition5OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip, Image and Output."""
     bl_idname = "addition5.addnodes"
     bl_label = " Additional Nodes"
@@ -3226,9 +2124,8 @@ class Addition5OP(bpy.types.Operator):
         addition5(context)
         return {'FINISHED'} 
     
-    
-    #operation to addition6 (sketch)  
-class Addition6OP(bpy.types.Operator):
+
+class Addition6OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip and Output."""
     bl_idname = "addition6.addnodes"
     bl_label = " Additional Nodes"
@@ -3237,8 +2134,8 @@ class Addition6OP(bpy.types.Operator):
         addition6(context)
         return {'FINISHED'} 
     
-    #operation to addition7 (post)  
-class Addition7OP(bpy.types.Operator):
+
+class Addition7OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip and Output."""
     bl_idname = "addition7.addnodes"
     bl_label = " Additional Nodes"
@@ -3247,8 +2144,8 @@ class Addition7OP(bpy.types.Operator):
         addition7(context)
         return {'FINISHED'} 
     
-    #operation to addition8 (ink drop)  
-class Addition8OP(bpy.types.Operator):
+  
+class Addition8OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip and Output."""
     bl_idname = "addition8.addnodes"
     bl_label = " Additional Nodes"
@@ -3257,10 +2154,8 @@ class Addition8OP(bpy.types.Operator):
         addition8(context)
         return {'FINISHED'} 
 
-
-
-    #operation to addition9 (Marker Removal)  
-class Addition9OP(bpy.types.Operator):
+  
+class Addition9OP(Operator):
     """Click this Button to add the Additional Nodes. Movie Clip and Output."""
     bl_idname = "addition9.addnodes"
     bl_label = " Additional Nodes"
@@ -3270,17 +2165,7 @@ class Addition9OP(bpy.types.Operator):
         return {'FINISHED'} 
 
 
-
-
-
-
-
-        
-
-
-
-# Operator Col Change
-class NODE_OT_colchangeGroup(bpy.types.Operator):
+class NODE_OT_colchangeGroup(Operator):
     """Click this button to add the Eye Color Change Node Group"""
     bl_idname = "node.colchange_operator"
     bl_label = "Eye Color Change"
@@ -3289,10 +2174,9 @@ class NODE_OT_colchangeGroup(bpy.types.Operator):
     def poll(cls, context):
         space = context.space_data
         return space.type == 'NODE_EDITOR'
-
+    
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Color Change Node"
         my_group = create_eyecol_group(self, context, custom_node_name)
         eyecol_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3301,18 +2185,16 @@ class NODE_OT_colchangeGroup(bpy.types.Operator):
         eyecol_node.select = False
         eyecol_node.use_custom_color = True
         eyecol_node.color = (0.375501, 0.866654, 0.702325)
-        eyecol_node.width= 200       
-
+        eyecol_node.width= 200
+        eyecol_node.inputs[0].hide_value = True
+        eyecol_node.inputs[1].hide_value = True 
+        eyecol_node.inputs[2].hide_value = True
+        eyecol_node.inputs[3].hide_value = True
         
         return {'FINISHED'}
     
-    
-    
-    
-    
-    
-    # Operator Scifi Eyes
-class NODE_OT_scifieyesGroup(bpy.types.Operator):
+
+class NODE_OT_scifieyesGroup(Operator):
     """Click this button to add the Sci-fi Eyes Node Group"""
     bl_idname = "node.scifieyes_operator"
     bl_label = "Sci-fi Eyes"
@@ -3324,7 +2206,6 @@ class NODE_OT_scifieyesGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Sci-fi Eyes Node"
         my_group = create_scifieye_group(self, context, custom_node_name)
         scifieye_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3334,13 +2215,19 @@ class NODE_OT_scifieyesGroup(bpy.types.Operator):
         scifieye_node.color = (0.0754633, 0.73702, 0.0112345)
         scifieye_node.select = False
         scifieye_node.width= 230
+        scifieye_node.inputs[0].hide_value = True
+        scifieye_node.inputs[1].hide_value = True
+        scifieye_node.inputs[2].hide_value = True
+        scifieye_node.inputs[3].hide_value = True
+        scifieye_node.inputs[15].hide_value = True
+        scifieye_node.inputs[16].hide_value = True
+        scifieye_node.inputs[17].hide_value = True
+        scifieye_node.inputs[18].hide_value = True
 
         return {'FINISHED'}
     
-    
-    
-# Operator Patch
-class NODE_OT_patchGroup(bpy.types.Operator):
+
+class NODE_OT_patchGroup(Operator):
     """Click this button to add the Patch Node Group"""
     bl_idname = "node.patch_operator"
     bl_label = "Patch Node"
@@ -3352,7 +2239,6 @@ class NODE_OT_patchGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Patch Node"
         my_group = create_patch_group(self, context, custom_node_name)
         patch_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3362,16 +2248,17 @@ class NODE_OT_patchGroup(bpy.types.Operator):
         patch_node.color = (0.226723, 0.734245, 0.759009)
         patch_node.select = False
         patch_node.width= 210
+        patch_node.inputs[0].hide_value = True
+        patch_node.inputs[1].hide_value = True
+        patch_node.inputs[2].hide_value = True
+        patch_node.inputs[3].hide_value = True
+        patch_node.inputs[12].hide_value = True
+        patch_node.inputs[13].hide_value = True
 
         return {'FINISHED'}    
-    
 
 
-
-
-
-# Operator Planar tool
-class NODE_OT_planarGroup(bpy.types.Operator):
+class NODE_OT_planarGroup(Operator):
     """Click this button to add the 2D Planar Node Group"""
     bl_idname = "node.planar_operator"
     bl_label = "2D Planar Tool"
@@ -3383,7 +2270,6 @@ class NODE_OT_planarGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "2D Planar Node"
         my_group = create_planar_group(self, context, custom_node_name)
         planar_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3393,7 +2279,6 @@ class NODE_OT_planarGroup(bpy.types.Operator):
         planar_node.color = (0.608, 0.51478, 0.490594)
         planar_node.select = False
         planar_node.width= 210
-        
         planartrack_node = context.scene.node_tree.nodes.new('CompositorNodePlaneTrackDeform')
         planartrack_node.location = 300,-100
         planartrack_node.select = False
@@ -3402,24 +2287,19 @@ class NODE_OT_planarGroup(bpy.types.Operator):
         img_node.location = 100,-100
         img_node.select = False
         
-        
         tree = bpy.context.scene.node_tree
         links = tree.links
         link = links.new(planartrack_node.outputs[0], planar_node.inputs[2])
         link = links.new(img_node.outputs[0], planartrack_node.inputs[0])
+        
+        planar_node.inputs[0].hide_value = True
+        planar_node.inputs[1].hide_value = True
+        planar_node.inputs[2].hide_value = True
 
         return {'FINISHED'}  
 
 
-
-
-
-
-
-
-
-# Operator subsurface node
-class NODE_OT_subsurfaceGroup(bpy.types.Operator):
+class NODE_OT_subsurfaceGroup(Operator):
     """Click this button to add the Subsurface Node Group"""
     bl_idname = "node.subsurface_operator"
     bl_label = "Subsurface Skin Node"
@@ -3431,7 +2311,6 @@ class NODE_OT_subsurfaceGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Subsurface Skin Node"
         my_group = create_subsurface_group(self, context, custom_node_name)
         subsurface_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3439,8 +2318,9 @@ class NODE_OT_subsurfaceGroup(bpy.types.Operator):
         subsurface_node.location = 500,-300
         subsurface_node.use_custom_color = True
         subsurface_node.color = (0.608, 0.389065, 0.329328)
-        
-
+        subsurface_node.inputs[0].hide_value = True
+        subsurface_node.inputs[1].hide_value = True
+        subsurface_node.inputs[2].hide_value = True
         subsurface_node.select = False
         subsurface_node.width= 210
         
@@ -3453,35 +2333,18 @@ class NODE_OT_subsurfaceGroup(bpy.types.Operator):
         material_node.select = False
         material_node.outputs[0].hide = True
         
-        
-        
         tree = bpy.context.scene.node_tree
         links = tree.links
         link = links.new(planartrack_node.outputs[0], subsurface_node.inputs[2])
         link = links.new(material_node.outputs[1], planartrack_node.inputs[0])
-        
-        
-        
-        
-        
-        
-       
-
-        # Create the texture
+    
         my_texture = bpy.data.textures.new('SubsurfaceSkinTexture', 'IMAGE')
-
-        # Enable use nodes
         my_texture.use_nodes = True
-
-        # Get the tree
         tex_tree = my_texture.node_tree
         
-
-        # Clear default nodes
         for node in tex_tree.nodes:
             tex_tree.nodes.remove(node)
 
-        # Create Nodes
         out = tex_tree.nodes.new('TextureNodeOutput')
         out.location = (800,100)
         
@@ -3492,44 +2355,16 @@ class NODE_OT_subsurfaceGroup(bpy.types.Operator):
         noise1.inputs[2].default_value = 0.95
         noise1.inputs[3].default_value = 13.8
         
-        
-        
         material_node.texture = my_texture
-        
-        
-        
-        # Enable use nodes in the compositor
         context.scene.use_nodes = True
-
-        # Get the tree
         comp_tree = context.scene.node_tree
-
-        
-        
-        # Link Group to Output
         
         tex_tree.links.new(noise1.outputs[0], out.inputs[0])
 
         return {'FINISHED'}
 
 
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-# Operator Marker removal
-class NODE_OT_markerremGroup(bpy.types.Operator):
+class NODE_OT_markerremGroup(Operator):
     """Click this button to add the Marker Removal Node Group"""
     bl_idname = "node.markerrem_operator"
     bl_label = "Marker Removal Node"
@@ -3541,7 +2376,6 @@ class NODE_OT_markerremGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Marker Removal Node"
         my_group = create_markerrem_group(self, context, custom_node_name)
         markerrem_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3549,21 +2383,13 @@ class NODE_OT_markerremGroup(bpy.types.Operator):
         markerrem_node.location = 500,-500
         markerrem_node.use_custom_color = True
         markerrem_node.color = (0.0757802, 0.509969, 0.759009)
-
         markerrem_node.select = False
         markerrem_node.width= 200
 
         return {'FINISHED'} 
 
 
-    
-    
-    
-    
-    
-    
-# Operator clone
-class NODE_OT_cloneGroup(bpy.types.Operator):
+class NODE_OT_cloneGroup(Operator):
     """Click this button to add the Clone Node Group"""
     bl_idname = "node.clone_operator"
     bl_label = "Clone Node"
@@ -3575,7 +2401,6 @@ class NODE_OT_cloneGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Clone Node"
         my_group = create_clone_group(self, context, custom_node_name)
         clone_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3585,15 +2410,14 @@ class NODE_OT_cloneGroup(bpy.types.Operator):
         clone_node.color = (0.0143871, 0.56356, 0.680215)
         clone_node.select = False
         clone_node.width= 210
+        clone_node.inputs[0].hide_value = True
+        clone_node.inputs[1].hide_value = True
+        clone_node.inputs[2].hide_value = True
 
         return {'FINISHED'}      
     
-    
-    
 
-
-# Operator glitch
-class NODE_OT_glitchGroup(bpy.types.Operator):
+class NODE_OT_glitchGroup(Operator):
     """Click this button to add the Glitch Node Group"""
     bl_idname = "node.glitch_operator"
     bl_label = "Glitch Node"
@@ -3607,20 +2431,17 @@ class NODE_OT_glitchGroup(bpy.types.Operator):
         sc = context.scene
         tree = sc.node_tree
 
-        # Create the group
         custom_node_name = "Glitch Node"
         my_group = create_glitch_group(self, context, custom_node_name)
         glitch_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
         glitch_node.node_tree = bpy.data.node_groups[my_group.name]
         glitch_node.location = 100,400
         glitch_node.use_custom_color = True
-        
-        
         glitch_node.color = (0.627484, 0.426714, 0.8195)
-        
         glitch_node.width= 210
-        
-        
+        glitch_node.inputs[0].hide_value = True
+        glitch_node.inputs[1].hide_value = True
+        glitch_node.inputs[2].hide_value = True
         glitch_node.inputs[6].default_value = 7
         glitch_node.inputs[6].keyframe_insert("default_value", frame= 30)
         glitch_node.select = True
@@ -3631,20 +2452,11 @@ class NODE_OT_glitchGroup(bpy.types.Operator):
         if fc:
             new_mod = fc.modifiers.new('NOISE')
             new_mod.strength = 200
-        
-        
-        
-
+            
         return {'FINISHED'}     
     
     
-    
-    
-    
-    
-    
-# Operator color presets
-class NODE_OT_colpreGroup(bpy.types.Operator):
+class NODE_OT_colpreGroup(Operator):
     """Click this button to add the Color Presets Node Group"""
     bl_idname = "node.colper_operator"
     bl_label = "Color Presets Node"
@@ -3656,7 +2468,6 @@ class NODE_OT_colpreGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Color Presets Node"
         my_group = create_colpre_group(self, context, custom_node_name)
         colpre_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3669,9 +2480,8 @@ class NODE_OT_colpreGroup(bpy.types.Operator):
 
         return {'FINISHED'}      
      
-
-# Operator TransitionNode
-class NODE_OT_transitionGroup(bpy.types.Operator):
+     
+class NODE_OT_transitionGroup(Operator):
     """Click this button to add the Transition Node"""
     bl_idname = "node.transition_operator"
     bl_label = "Transition Node"
@@ -3683,7 +2493,6 @@ class NODE_OT_transitionGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Transition Node"
         my_group = create_transition_group(self, context, custom_node_name)
         trans_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3696,13 +2505,8 @@ class NODE_OT_transitionGroup(bpy.types.Operator):
 
         return {'FINISHED'} 
     
-    
-    
-    
-    
-    
-# Operator sketch
-class NODE_OT_sketchGroup(bpy.types.Operator):
+
+class NODE_OT_sketchGroup(Operator):
     """Click this button to add the Sketch Node Group"""
     bl_idname = "node.sketch_operator"
     bl_label = "Sketch Node"
@@ -3714,7 +2518,6 @@ class NODE_OT_sketchGroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Sketch Node"
         my_group = create_sketch_group(self, context, custom_node_name)
         sketch_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3724,12 +2527,12 @@ class NODE_OT_sketchGroup(bpy.types.Operator):
         sketch_node.color = (0.560462, 0.680215, 0.56744)
         sketch_node.select = False
         sketch_node.width= 210
-
+        sketch_node.inputs[0].hide_value = True
+        
         return {'FINISHED'}      
     
-    
-# Operator post1
-class NODE_OT_post1group(bpy.types.Operator):
+
+class NODE_OT_post1group(Operator):
     """Click this button to add the Posterize Node: Option 1"""
     bl_idname = "node.post1_operator"
     bl_label = "Option 1"
@@ -3741,7 +2544,6 @@ class NODE_OT_post1group(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Posterize Effect Option 1"
         my_group = create_post1_group(self, context, custom_node_name)
         post1_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3751,11 +2553,12 @@ class NODE_OT_post1group(bpy.types.Operator):
         post1_node.color = (0.451251, 0.191486, 0.374164)  
         post1_node.select = False
         post1_node.width= 170
+        post1_node.inputs[0].hide_value = True
 
         return {'FINISHED'}      
     
-    # Operator post2
-class NODE_OT_post2group(bpy.types.Operator):
+
+class NODE_OT_post2group(Operator):
     """Click this button to add the Posterize Node: Option 2"""
     bl_idname = "node.post2_operator"
     bl_label = "Option 2"
@@ -3767,7 +2570,6 @@ class NODE_OT_post2group(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Posterize Effect Option 2"
         my_group = create_post2_group(self, context, custom_node_name)
         post2_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3777,13 +2579,12 @@ class NODE_OT_post2group(bpy.types.Operator):
         post2_node.color = (0.715406, 0.387641, 0.577297)
         post2_node.select = False
         post2_node.width= 170
+        post2_node.inputs[0].hide_value = True
 
         return {'FINISHED'} 
     
     
-    
-# Operator post3
-class NODE_OT_post3group(bpy.types.Operator):
+class NODE_OT_post3group(Operator):
     """Click this button to add the Posterize Node: Option 3"""
     bl_idname = "node.post3_operator"
     bl_label = "Option 3"
@@ -3795,7 +2596,6 @@ class NODE_OT_post3group(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Posterize Effect Option 3"
         my_group = create_post3_group(self, context, custom_node_name)
         post3_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3805,12 +2605,12 @@ class NODE_OT_post3group(bpy.types.Operator):
         post3_node.color = (0.632678, 0.273532, 0.389893)
         post3_node.select = False
         post3_node.width= 170
+        post3_node.inputs[0].hide_value = True
 
         return {'FINISHED'}     
     
     
-    # Operator Ink drop
-class NODE_OT_inkdropgroup(bpy.types.Operator):
+class NODE_OT_inkdropgroup(Operator):
     """Click this button to add the Ink drop Node Group"""
     bl_idname = "node.inkdrop_operator"
     bl_label = "Ink Drop Node"
@@ -3822,7 +2622,6 @@ class NODE_OT_inkdropgroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Ink Drop Effect Node"
         my_group = create_inkdrop_group(self, context, custom_node_name)
         inkdrop_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3832,21 +2631,13 @@ class NODE_OT_inkdropgroup(bpy.types.Operator):
         inkdrop_node.color = (0.310401, 0.32662, 0.32662)
         inkdrop_node.select = False
         inkdrop_node.width= 210
+        inkdrop_node.inputs[0].hide_value = True
+        inkdrop_node.inputs[1].hide_value = True
 
         return {'FINISHED'}   
     
-    
-    
 
-
-
-
-
-
-
-
-    # Operator Vignette effect
-class NODE_OT_viggroup(bpy.types.Operator):
+class NODE_OT_viggroup(Operator):
     """Click this button to add a Vignette Node Group"""
     bl_idname = "node.vig_operator"
     bl_label = "Vignette Node"
@@ -3858,7 +2649,6 @@ class NODE_OT_viggroup(bpy.types.Operator):
 
     def execute(self, context):
 
-        # Create the group
         custom_node_name = "Vignette Node"
         my_group = create_vig_group(self, context, custom_node_name)
         vig_node = context.scene.node_tree.nodes.new('CompositorNodeGroup')
@@ -3866,60 +2656,41 @@ class NODE_OT_viggroup(bpy.types.Operator):
         vig_node.location = 900,400
         vig_node.use_custom_color = True
         vig_node.color = (0.102573, 0.116922, 0.152942)
-        
-
-
+        vig_node.inputs[0].hide_value = True
         vig_node.select = False
         vig_node.width= 210
 
         return {'FINISHED'}   
 
 
-
-
-
-
-
-    
-    
-    
-
-
-# Main Panel
-class NODE_PT_customPanel(bpy.types.Panel):
+class NODE_PT_customPanel(Panel):
     bl_idname = "NODE_PT_customPanel"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Darkfall VFX Nodes"
     bl_region_type = "UI"
     bl_category = "Darkfall VFX Nodes"
 
-    
-
     def draw(self, context):
         layout = self.layout
         scene = context.scene
         obj = context.object
-        
-        #Welcome text
-        
+
         layout.label(text="______________________________________")
         row = layout.row()
         row = layout.row()
         layout.label(text=" Select one of the VFX Panels, and")
-        layout.label(text=" choose the effect you wish to create.")
+        layout.label(text=" choose the effect you wish to")
+        layout.label(text=" create.")
         row = layout.row()
+        row = layout.row()
+        layout.label(text=" Shorcut: Ctrl + A")
+        
         row = layout.row()
         layout.label(text=" Visit our blog for more information.")
         layout.label(text="______________________________________")
         
 
-
-
-
-#planar sub18 panel
-class Sub18Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "planarpanel"
+class Sub18Panel(Panel):
     bl_idname = "OBJECT_PT_planar"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "2D Planar Tool"
@@ -3927,53 +2698,18 @@ class Sub18Panel(bpy.types.Panel):
     bl_category = "Darkfall VFX Nodes"
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_toolseffect'
+    
+    bool = bpy.props.BoolProperty(name= "")
 
     def draw(self, context):
         layout = self.layout
         obj = context.object
-        
-            
-        
 
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Planar Info", icon= 'LIGHTPROBE_PLANAR')
+        row = layout.row()
+    
         
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
+        row.prop(self, "bool")
         
-            row = box.row()
-            row.label(text=" The Planar Tool will take an area")
-            row = box.row()
-            row.label(text=" of your Movie clip and add an")
-            row = box.row()
-            row.label(text=" image or Movie Clip.")
-            row = box.row()
-            row.label(text=" You can also create a")
-            row = box.row()
-            row.label(text=" Drop Shadow, if needed.")
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" The Subsurface Skin Effect will.")
-            row = box.row()
-            row.label(text=" add a texture along with the.")
-            row = box.row()
-            row.label(text=" 2D Planar Tool.")
-            row = box.row()
-           
         row = layout.row()
         layout.operator(NODE_OT_planarGroup.bl_idname, icon= 'CHECKBOX_DEHLT')
         layout.operator(NODE_OT_subsurfaceGroup.bl_idname, icon= 'USER')
@@ -3982,34 +2718,10 @@ class Sub18Panel(bpy.types.Panel):
         row.operator("addition4.addnodes", icon= 'NODE_SEL')
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-                
-        
-        row = layout.row()
-        
         row = layout.row()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-#clone sub1 panel
-class Sub1Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "clonepanel"
+class Sub1Panel(Panel):
     bl_idname = "OBJECT_PT_clone"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Clone Node"
@@ -4022,64 +2734,18 @@ class Sub1Panel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
         
+        row = layout.row()
             
-        
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Clone Info", icon= 'ZOOM_PREVIOUS')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" The Clone Node will take an area")
-            row = box.row()
-            row.label(text=" of your Movie clip and replace.")            
-            row = box.row()
-            row.label(text=" it with a diffrent section of our clip.")
-            row = box.row()
-            row = box.row()
-            row.label(text=" With a Mask we can define the area we")
-            row = box.row()
-            row.label(text=" want to be replaced, cloning over")
-            row = box.row()
-            row.label(text=" any unwanted objects.")
-            row = box.row()
-           
         row = layout.row()
         layout.operator(NODE_OT_cloneGroup.bl_idname, icon= 'ZOOM_SELECTED')
-        
         row = layout.row()
         row.operator("addition4.addnodes", icon= 'NODE_SEL')
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-                
-        
-        row = layout.row()
-        
         row = layout.row()
         
         
-        
-        
-        
-#eye color sub panel 4
-class Sub4Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "eyecolpanel"
+class Sub4Panel(Panel):
     bl_idname = "OBJECT_PT_eyecol"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Eye Color Change"
@@ -4088,71 +2754,23 @@ class Sub4Panel(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_eyeeffect'
     
-
     def draw(self, context):
         layout = self.layout
         obj = context.object
         
-        
-        
-            
-        
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Eye Color Change Info", icon= 'VIS_SEL_11')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row.label(text=" The Eye Color Change, will change")
-            row = box.row()
-            row.label(text=" the Color of your subject's eyes")
-            row = box.row()
-            
-            row = box.row()
-            row.label(text=" You will need a Mask for the Eyes,")
-            row = box.row()
-            row.label(text=" another for the Eyelids, and one")
-            row = box.row()
-            row.label(text=" (though not compulsory) for the")
-            row = box.row()
-            row.label(text=" Garbage.")
-            row = box.row()
-                    
-        
+        row = layout.row()
             
         row = layout.row(align=True)
         layout.operator(NODE_OT_colchangeGroup.bl_idname, icon= 'VIS_SEL_11')
-        
         
         row = layout.row()
         row.operator("addition1.addnodes", icon= 'NODE_SEL')
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
-        row = layout.row()
 
 
-
-
-
-#glitch sub5 panel
-class Sub5Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "glitchpanel"
+class Sub5Panel(Panel):
     bl_idname = "OBJECT_PT_glitch"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Glitch Node"
@@ -4161,84 +2779,28 @@ class Sub5Panel(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_artisticeffect'
     
-   
-
+    
+    
     def draw(self, context):
         layout = self.layout
         obj = context.object
         
-            
         
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Glitch Info", icon= 'HAND')
         
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
         
-            row = box.row()
-            row.label(text=" The Glitch Effect will take a Movie")
-            row = box.row()
-            row.label(text=" clip and add a Glitch Effect.")            
-            row = box.row()
-            row = box.row()
-            row.label(text=" You will need an Image for the")
-            row = box.row()
-            row.label(text=" Glitch Pattern movement or you")
-            row = box.row()
-            row.label(text=" use the Scan line Generator button.")
-            row = box.row()
-            row = box.row()
-        
-          
+        row = layout.row()
         row = layout.row()
         row.operator(NODE_OT_glitchGroup.bl_idname, icon= 'HAND')
         row = layout.row()
-        
-        
-        
         row.operator("node.scanline_operator", icon= 'LINENUMBERS_OFF')
         row = layout.row()
         row.operator("addition5.addnodes", icon= 'NODE_SEL')
-        
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-        row = layout.row()
         
-        row = layout.row()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#props  panel
-class NODE_PT_active_node_properties(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "props"
+class NODE_PT_active_node_properties(Panel):
     bl_idname = "OBJECT_PT_propert"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Properties"
@@ -4261,7 +2823,6 @@ class NODE_PT_active_node_properties(bpy.types.Panel):
         elif hasattr(node, "draw_buttons"):
             node.draw_buttons(context, layout)
 
-        
         value_inputs = [socket for socket in node.inputs if socket.enabled and not socket.is_linked]
         if value_inputs:
             layout.separator()
@@ -4271,21 +2832,7 @@ class NODE_PT_active_node_properties(bpy.types.Panel):
                 socket.draw(context, row, node, iface_(socket.name, socket.bl_rna.translation_context))
 
 
-
-
-
-
-
-
-
-
-
-
-
-#Gradient sub10 panel
-class Sub10Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "gradpanel"
+class Sub10Panel(Panel):
     bl_idname = "OBJECT_PT_grad"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Gradient Node"
@@ -4293,8 +2840,6 @@ class Sub10Panel(bpy.types.Panel):
     bl_category = "Darkfall VFX Nodes"
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_toolseffect'
-    
-    
 
     def draw(self, context):
         layout = self.layout
@@ -4303,68 +2848,17 @@ class Sub10Panel(bpy.types.Panel):
         strip = scene.render
         
         
-        
-
-        
         row = layout.row()
-        
-       
-        
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Gradient Info", icon= 'RIGID_BODY')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" Add a simple Gradient effect to")
-            row = box.row()
-            row.label(text=" your videos.")           
-            row = box.row()
-            row = box.row()
-            row.label(text=" You can move and scale the Effect") 
-            row = box.row()
-            row.label(text=" to suit your needs.") 
-            row = box.row()
-        
+         
         row = layout.row()
-        
         row.operator("node.gradient_operator", icon= 'RIGID_BODY')
         row = layout.row()
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-        
-        
-        
-        
-        
-        
-        
         row = layout.row()
 
 
-
-
-
-
-#Scanline sub15 panel
-class Sub15Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "scanpanel"
+class Sub15Panel(Panel):
     bl_idname = "OBJECT_PT_scan"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Scan line Generator"
@@ -4373,80 +2867,25 @@ class Sub15Panel(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_toolseffect'
     
-    
-
     def draw(self, context):
         layout = self.layout
         obj = context.object
         scene = context.scene
         strip = scene.render
         
-        
-        
-
+      
+        row = layout.row()
+               
         
         row = layout.row()
-        
-       
-        
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Scan line Info", icon= 'LINENUMBERS_OFF')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" Add a Scan line to your videos")
-            row = box.row()
-            row.label(text=" with the help of this node.")           
-            row = box.row()
-            row = box.row()
-            row = box.row()
-        
-        row = layout.row()
-        
         row.operator("node.scanline_operator", icon= 'LINENUMBERS_OFF')
         row = layout.row()
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-        
-        
-        
-        
-        
-        
-        
         row = layout.row()
 
 
-
-
-
-
-
-
-
-
-
-
-#Transition sub20 panel
-class Sub20Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "transitionpanel"
+class Sub20Panel(Panel):
     bl_idname = "OBJECT_PT_transition"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Transition Node"
@@ -4454,106 +2893,29 @@ class Sub20Panel(bpy.types.Panel):
     bl_category = "Darkfall VFX Nodes"
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_toolseffect'
-    
-    
 
     def draw(self, context):
         layout = self.layout
         obj = context.object
         scene = context.scene
         strip = scene.render
-        
-        
-        
 
-        
+    
         row = layout.row()
         
-       
-        
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Transition Node Info", icon= 'ANIM_DATA')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" Transition between your Original")
-            row = box.row()
-            row.label(text=" and Edited Video Clip.")  
-            row = box.row()
-            row.label(text=" You could use a Black and")
-            row = box.row()
-            row.label(text=" white video as a transition.")                     
-            row = box.row()
-            row = box.row()
-            row = box.row()
+           
         
         row = layout.row()
-        
         row.prop(scene, "frame_current", text="Frame")
         row = layout.row()
         row.operator("node.transition_operator", icon= 'ANIM_DATA')
         row = layout.row()
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-        
-        
-        
-        
-        
-        
-        
         row = layout.row()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Ink drop sub8 panel
-class Sub8Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "inkpanel"
+class Sub8Panel(Panel):
     bl_idname = "OBJECT_PT_ink"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Ink Drop Node"
@@ -4566,53 +2928,18 @@ class Sub8Panel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
         
-            
-        
-
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Ink Drop Info", icon= 'MOD_FLUIDSIM')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" The Ink Drop Effect will take a")
-            row = box.row()
-            row.label(text=" Smoke asset and a black and white")           
-            row = box.row()
-            row.label(text=" Image to create this effect.") 
-            row = box.row()
-            row = box.row()
         
         row = layout.row()
+        row = layout.row()
         layout.operator(NODE_OT_inkdropgroup.bl_idname, icon= 'PMARKER_SEL')
-        
         row = layout.row()
         row.operator("addition8.addnodes", icon= 'NODE_SEL')
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
         
-        row = layout.row()
-        
 
-#patch sub3 panel
-class Sub3Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "patchpanel"
+class Sub3Panel(Panel):
     bl_idname = "OBJECT_PT_patch"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Patch Node"
@@ -4624,65 +2951,18 @@ class Sub3Panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         obj = context.object
-        
-            
-        
 
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Patch Info", icon= 'SEQ_PREVIEW')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" The Patch Node, will take a Movie,")
-            row = box.row()
-            row.label(text=" clip and add (or patch) it on top")
-            row = box.row()
-            row.label(text=" of your Background Movie clip.")            
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" You will Need to Mask around your,")
-            row = box.row()
-            row.label(text=" patch object.")
-            row = box.row()
-            row = box.row()
-            row.label(text=" If your camera is moving, you will")
-            row = box.row()
-            row.label(text=" also need to Track your shot.")
-            row = box.row()
-           
+        row = layout.row()
         row = layout.row()
         layout.operator(NODE_OT_patchGroup.bl_idname, icon= 'SEQ_PREVIEW')
-        
         row = layout.row()
         row.operator("addition3.addnodes", icon= 'NODE_SEL')
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
         
-        row = layout.row()
-        
-        
-        
-#Posterize sub7 panel
-class Sub7Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "postpanel"
+
+class Sub7Panel(Panel):
     bl_idname = "OBJECT_PT_post"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Posterize Node"
@@ -4694,67 +2974,21 @@ class Sub7Panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         obj = context.object
-        
-            
-        
 
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Posterize Info", icon= 'FCURVE_SNAPSHOT')
-        
-
-        if obj.expanded:
-            row = box.row()
-            
-
-            row = box.row()
-        
-            row = box.row()
-            row.label(text=" The Posterize Effect will take a")
-            row = box.row()
-            row.label(text=" Movie clip and add a Posterize")   
-            row = box.row()
-            row.label(text=" Effect which you can modify.")          
-            row = box.row()
-            row = box.row()
-            row.label(text=" Playing around with the Values")
-            row = box.row()
-            row.label(text=" and the blend mode can give many")
-            row = box.row()
-            row.label(text=" different variations of this effect.")
-            row = box.row()
-        
+        row = layout.row()
         layout.label(text=" Select from the presets below.")   
         row = layout.row()
         layout.operator(NODE_OT_post1group.bl_idname, icon= 'KEYTYPE_BREAKDOWN_VEC')
         layout.operator(NODE_OT_post2group.bl_idname, icon= 'KEYTYPE_MOVING_HOLD_VEC')
         layout.operator(NODE_OT_post3group.bl_idname, icon= 'KEYTYPE_JITTER_VEC')
-        
         row = layout.row()
         row.operator("addition7.addnodes", icon= 'NODE_SEL')
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
-        
-        row = layout.row()
 
 
-
-
-
-
-#scifi sub2 panel
-class Sub2Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "scifieyepanel"
+class Sub2Panel(Panel):
     bl_idname = "OBJECT_PT_scifieye"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Sci-fi Eyes"
@@ -4763,44 +2997,11 @@ class Sub2Panel(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'OBJECT_PT_eyeeffect'
     
-    
-    
     def draw(self, context):
         layout = self.layout
         obj = context.object
-       
 
-        box = layout.box()
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Sci-fi Eyes Info", icon= 'HIDE_OFF')
-        
-
-        if obj.expanded:
-            row = box.row()
-            row = box.row()
-            row.label(text=" Sci-fi Eyes, will add a Texture to")
-            row = box.row()
-            row.label(text=" your subject's eyes.")
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" You need a Mask for the Eyelids,")
-            row = box.row()
-            row.label(text=" an Image Texture for the Eye.")
-            row = box.row()
-            row.label(text=" You can download an Image from")
-            row = box.row()
-            row.label(text=" our blog or use one of your own.")
-            row = box.row()
-                    
-            
+        row = layout.row()
         row = layout.row(align=True)
         layout.operator(NODE_OT_scifieyesGroup.bl_idname, icon= 'HIDE_OFF')
         row = layout.row()
@@ -4808,17 +3009,9 @@ class Sub2Panel(bpy.types.Panel):
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
-        row = layout.row()
 
 
-
-
-
-
-#sketch sub6 panel
-class Sub6Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "sketchpanel"
+class Sub6Panel(Panel):
     bl_idname = "OBJECT_PT_sketch"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Sketch Node"
@@ -4831,36 +3024,7 @@ class Sub6Panel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
         
-        box = layout.box()
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Sketch Info", icon= 'GPBRUSH_MARKER')
-        
-
-        if obj.expanded:
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" The Sketch Effect will take a Movie")
-            row = box.row()
-            row.label(text=" clip abd add a Sketch Effect which")
-            row = box.row()
-            row.label(text=" you can modify.")              
-            row = box.row()
-            row = box.row()
-            row.label(text=" You can also add the Paper Color")
-            row = box.row()
-            row.label(text="  Presets Node, which contains")
-            row = box.row()
-            row.label(text=" some, Paper Color Presets.")
-            row = box.row()
-           
+        row = layout.row()
         row = layout.row()
         layout.operator(NODE_OT_sketchGroup.bl_idname, icon= 'GREASEPENCIL')
         layout.operator(NODE_OT_colpreGroup.bl_idname, icon= 'PRESET')
@@ -4869,15 +3033,9 @@ class Sub6Panel(bpy.types.Panel):
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
-        row = layout.row()
 
 
-
-
-#Vignette sub9 panel
-class Sub9Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "vigpanel"
+class Sub9Panel(Panel):
     bl_idname = "OBJECT_PT_vig"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Vignette Node"
@@ -4890,49 +3048,16 @@ class Sub9Panel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
 
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Vignette Info", icon= 'SURFACE_NCURVE')
-        
-
-        if obj.expanded:
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" Add a simple Vignette effect to")
-            row = box.row()
-            row.label(text=" your videos.")           
-            row = box.row()
-            row = box.row()
-            row.label(text=" You can move and scale the Effect") 
-            row = box.row()
-            row.label(text=" to suit your needs.") 
-            row = box.row()
-        
+        row = layout.row()
         row = layout.row()
         layout.operator(NODE_OT_viggroup.bl_idname, icon= 'SURFACE_NCURVE')
         row = layout.row()
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
-        row = layout.row()
-        row = layout.row()  
+        row = layout.row() 
 
 
-
-
-
-#Filmgrain sub16 panel
-class Sub16Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "filmgrainpanel"
+class Sub16Panel(Panel):
     bl_idname = "OBJECT_PT_filmgrain"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Film Grain Node"
@@ -4945,33 +3070,7 @@ class Sub16Panel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
 
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Film Grain Info", icon= 'SCENE')
-        
-
-        if obj.expanded:
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" Add some film grain to your videos.")
-            row = box.row()
-            row.label(text=" You can choose either the Color")           
-            row = box.row()
-            row = box.row()
-            row.label(text=" or the black and white option,") 
-            row = box.row()
-            row.label(text=" to suit your needs.") 
-            row = box.row()
-        
+        row = layout.row()
         row = layout.row()
         row.operator("node.filmgrain1_operator", icon= 'KEYTYPE_MOVING_HOLD_VEC')
         row.operator("node.filmgrain2_operator", icon= 'HANDLETYPE_FREE_VEC')
@@ -4979,15 +3078,9 @@ class Sub16Panel(bpy.types.Panel):
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
-        row = layout.row()
 
 
-
-
-#Marker Removal sub17 panel
-class Sub17Panel(bpy.types.Panel):
-    """Creates a Panel in the Object properties window"""
-    bl_label = "markerremovalpanel"
+class Sub17Panel(Panel):
     bl_idname = "OBJECT_PT_markerremoval"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Marker Removal Node"
@@ -5000,31 +3093,7 @@ class Sub17Panel(bpy.types.Panel):
         layout = self.layout
         obj = context.object
 
-        box = layout.box()
-
-        row = box.row()
-        row.prop(obj, "expanded",
-            icon="TRIA_DOWN" if obj.expanded else "TRIA_RIGHT",
-            icon_only=True, emboss=False
-            
-)
-                    
-                  
-        row.label(text="Marker Removal Info", icon= 'TRACKER')
-        
-
-        if obj.expanded:
-            row = box.row()
-            row = box.row()
-            row = box.row()
-            row.label(text=" We can remove Tracking Markers")
-            row = box.row()
-            row.label(text=" by using a mask and the Marker")           
-            row = box.row()
-            row.label(text=" Removal Node.") 
-            row = box.row()
-            
-        
+        row = layout.row()
         row = layout.row()
         row.operator("node.markerrem_operator", icon= 'CON_FOLLOWTRACK')
         row = layout.row()
@@ -5032,23 +3101,9 @@ class Sub17Panel(bpy.types.Panel):
         row.operator("rem.addnodes", icon= 'CANCEL')
         row = layout.row()
         row = layout.row()
-        row = layout.row()
 
 
-
-
-
-
-
-
-
-
-  
-
-
-# Artistic cat sub12 panel
-class Sub12Panel(bpy.types.Panel):
-    bl_label = "artisticeffectpanel"
+class Sub12Panel(Panel):
     bl_idname = "OBJECT_PT_artisticeffect"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Artistic Effects"
@@ -5060,9 +3115,7 @@ class Sub12Panel(bpy.types.Panel):
         layout = self.layout
 
 
-# Eyes cat sub13 panel
-class Sub13Panel(bpy.types.Panel):
-    bl_label = "eyeeffectpanel"
+class Sub13Panel(Panel):
     bl_idname = "OBJECT_PT_eyeeffect"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Eye Effects"
@@ -5074,9 +3127,7 @@ class Sub13Panel(bpy.types.Panel):
         layout = self.layout
 
 
-# Tools cat sub14 panel
-class Sub14Panel(bpy.types.Panel):
-    bl_label = "toolseffectpanel"
+class Sub14Panel(Panel):
     bl_idname = "OBJECT_PT_toolseffect"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Tools"
@@ -5088,12 +3139,7 @@ class Sub14Panel(bpy.types.Panel):
         layout = self.layout
 
 
-
-
-
-#Render sub11 panel
-class Sub11Panel(bpy.types.Panel):
-    bl_label = "renpanel"
+class Sub11Panel(Panel):
     bl_idname = "OBJECT_PT_ren"
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Render Settings"
@@ -5160,179 +3206,126 @@ class Sub11Panel(bpy.types.Panel):
         row = layout.row()
         row = layout.row()
         row = layout.row()
+
+
+
+
+class VFXNODES_MT_Artistic(Menu):
+    """The Artistic Section Contains: The Glitch Node, The Inkdrop Node, The Posterize Effect Node and The Sketch Node."""
+    bl_label = "Artistic Effects"
+    bl_idname = "node.artisticeffects_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator("node.glitch_operator", text= "The Glitch Node", icon= 'HAND')
+        layout.operator("node.inkdrop_operator", text= "The Inkdrop Node", icon= 'PMARKER_SEL')
+        layout.operator("node.post1_operator", text= "The Posterize Node", icon= 'KEYTYPE_KEYFRAME_VEC')
+        layout.operator("node.sketch_operator", text= "The Sketch Node", icon= 'GREASEPENCIL')
         
-        
-        
-        
-        
 
 
+class VFXNODES_MT_EyeEffects(Menu):
+    """The Eye Effects Section Contains: The Eye Color Change Node and The Scifi Eyes Node."""
+    bl_label = "Eye Effects"
+    bl_idname = "node.eyeeffects_menu"
 
+    def draw(self, context):
+        layout = self.layout
 
-
-
-
-
-
-
-
+        layout.operator("node.colchange_operator", text= "The Eye Color Change Node", icon= 'VIS_SEL_11')
+        layout.operator("node.scifieyes_operator", text= "The Scifi Eyes Node", icon= 'HIDE_OFF')
         
 
-# Register
+
+class VFXNODES_MT_Tools(Menu):
+    """The Tools Section Contains: The 2D Planar Tool, The Clone Node, The Film Grain Node, The Gradient Node, The Marker Removal Node, The Patch Node, The Scal Line Generator Node, The Transition Node and The Vignette Node."""
+    bl_label = "Tools"
+    bl_idname = "node.tools_menu"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator("node.planar_operator", text= "The 2D Planar Node", icon= 'CHECKBOX_DEHLT')
+        layout.operator("node.clone_operator", text= "The Clone Node", icon= 'ZOOM_SELECTED')   
+        layout.operator("node.filmgrain2_operator", text= "The Film Grain Node", icon= 'FREEZE')
+        layout.operator("node.gradient_operator", text= "The Gradient Node", icon= 'FCURVE')
+        layout.operator("node.markerrem_operator", text= "The Marker Removal Node", icon= 'CON_OBJECTSOLVER')
+        layout.operator("node.patch_operator", text= "The Patch Node", icon= 'IMAGE_DATA')
+        layout.operator("node.scanline_operator", text= "The Scan Line Generator Node", icon= 'ALIGN_JUSTIFY')
+        layout.operator("node.transition_operator", text= "The Transition Node", icon= 'CON_FOLLOWPATH')  
+        layout.operator("node.vig_operator", text= "The Vignette Node", icon= 'CLIPUV_DEHLT')    
+
+
+
+        
+
+class VFXNODES_OT_Shortcut(Operator):
+    bl_label = "Add Node Menu"
+    bl_idname = "wm.call_addnode_menu"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    
+    
+    def draw(self, context):
+        layout = self.layout
+        
+        box = layout.box()
+        box.menu("node.artisticeffects_menu")
+        box.menu("node.eyeeffects_menu")
+        box.menu("node.tools_menu")
+        
+    def execute(self, context):
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)     
+        
+
+
+
+
+
+
+vfxnodes_keymaps = []
+
+classes = [NODE_PT_customPanel, VFXNODES_OT_Shortcut, VFXNODES_MT_Artistic, VFXNODES_MT_EyeEffects, VFXNODES_MT_Tools, Sub11Panel, Sub12Panel, Sub13Panel, Sub14Panel, NODE_PT_active_node_properties, NODE_OT_planarGroup, NODE_OT_subsurfaceGroup, NODE_OT_cloneGroup, NODE_OT_colchangeGroup, NODE_OT_scifieyesGroup, NODE_OT_patchGroup, NODE_OT_glitchGroup, NODE_OT_transitionGroup, NODE_OT_colpreGroup, NODE_OT_sketchGroup, NODE_OT_post1group, NODE_OT_post2group, NODE_OT_post3group, NODE_OT_inkdropgroup, NODE_OT_viggroup, RemOP, NODE_OT_texGroupGradient, NODE_OT_texGroupScanlines, NODE_OT_texGroupFilmGrain, NODE_OT_texGroupFilmGrain2, NODE_OT_markerremGroup, Addition1OP, Addition2OP, Addition3OP, Addition4OP, Addition5OP, Addition6OP, Addition7OP, Addition8OP, Addition9OP, Sub4Panel, Sub2Panel, Sub18Panel, Sub1Panel, Sub16Panel, Sub10Panel, Sub17Panel, Sub3Panel, Sub15Panel, Sub20Panel, Sub9Panel, Sub5Panel, Sub8Panel, Sub7Panel, Sub6Panel]
+ 
+
+
+    
 def register():
-    bpy.utils.register_class(NODE_PT_customPanel)
-    bpy.utils.register_class(Sub11Panel)
-    bpy.utils.register_class(Sub12Panel)
-    bpy.utils.register_class(Sub13Panel)
-    bpy.utils.register_class(Sub14Panel)
+    for cls in classes:
+        bpy.utils.register_class(cls)
     
-    bpy.utils.register_class(NODE_PT_active_node_properties)
-    bpy.utils.register_class(NODE_OT_planarGroup)
-    bpy.utils.register_class(NODE_OT_subsurfaceGroup)
-    bpy.utils.register_class(NODE_OT_cloneGroup)
-    bpy.utils.register_class(NODE_OT_colchangeGroup)
-    bpy.utils.register_class(NODE_OT_scifieyesGroup)
-    bpy.utils.register_class(NODE_OT_patchGroup)
-    bpy.utils.register_class(NODE_OT_glitchGroup)
-    bpy.utils.register_class(NODE_OT_transitionGroup)
-    bpy.utils.register_class(NODE_OT_colpreGroup)
-    bpy.utils.register_class(NODE_OT_sketchGroup)
-    bpy.utils.register_class(NODE_OT_post1group)
-    bpy.utils.register_class(NODE_OT_post2group)
-    bpy.utils.register_class(NODE_OT_post3group)
-    bpy.utils.register_class(NODE_OT_inkdropgroup)
-    bpy.utils.register_class(NODE_OT_viggroup)  
-    bpy.utils.register_class(RemOP)
-    bpy.utils.register_class(NODE_OT_texGroupGradient)
-    bpy.utils.register_class(NODE_OT_texGroupScanlines)
-    bpy.utils.register_class(NODE_OT_texGroupFilmGrain)
-    bpy.utils.register_class(NODE_OT_texGroupFilmGrain2)
-    bpy.utils.register_class(NODE_OT_markerremGroup)
-    bpy.utils.register_class(Addition1OP)
-    bpy.utils.register_class(Addition2OP)
-    bpy.utils.register_class(Addition3OP)
-    bpy.utils.register_class(Addition4OP)
-    bpy.utils.register_class(Addition5OP)
-    bpy.utils.register_class(Addition6OP)
-    bpy.utils.register_class(Addition7OP)
-    bpy.utils.register_class(Addition8OP)
-    bpy.utils.register_class(Addition9OP)
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps.new(name='Node Editor', space_type= 'NODE_EDITOR')
+        kmi = km.keymap_items.new("wm.call_addnode_menu", type= 'A', value= 'PRESS', ctrl= True)
+        
+        vfxnodes_keymaps.append((km, kmi))
     
-    
-    bpy.utils.register_class(Sub4Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub2Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    
-    
-    bpy.utils.register_class(Sub18Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub1Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub16Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub10Panel)
-    bpy.utils.register_class(Sub17Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub3Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub15Panel)
-    bpy.utils.register_class(Sub20Panel)
-    bpy.utils.register_class(Sub9Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    
-    
-
-    bpy.utils.register_class(Sub5Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub8Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub7Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    bpy.utils.register_class(Sub6Panel)
-    bpy.types.Object.expanded = bpy.props.BoolProperty(default=False)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
 
 
 def unregister():
-    bpy.utils.unregister_class(NODE_PT_customPanel)
-    bpy.utils.unregister_class(Sub11Panel)
-    bpy.utils.unregister_class(Sub12Panel)
-    bpy.utils.unregister_class(Sub13Panel)
-    bpy.utils.unregister_class(Sub14Panel)
-    bpy.utils.unregister_class(NODE_PT_active_node_properties)
-    bpy.utils.unregister_class(NODE_OT_planarGroup)
-    bpy.utils.unregister_class(NODE_OT_subsurfaceGroup)
-    bpy.utils.unregister_class(NODE_OT_cloneGroup)
-    bpy.utils.unregister_class(NODE_OT_colchangeGroup)
-    bpy.utils.unregister_class(NODE_OT_scifieyesGroup)
-    bpy.utils.unregister_class(NODE_OT_patchGroup)
-    bpy.utils.unregister_class(NODE_OT_glitchGroup)
-    bpy.utils.unregister_class(NODE_OT_transitionGroup)
-    bpy.utils.unregister_class(NODE_OT_colpreGroup)
-    bpy.utils.unregister_class(NODE_OT_sketchGroup)
-    bpy.utils.unregister_class(NODE_OT_post1group)
-    bpy.utils.unregister_class(NODE_OT_post2group)
-    bpy.utils.unregister_class(NODE_OT_post3group)
-    bpy.utils.unregister_class(NODE_OT_inkdropgroup)
-    bpy.utils.unregister_class(NODE_OT_viggroup)
-    bpy.utils.unregister_class(RemOP)
-    bpy.utils.unregister_class(NODE_OT_texGroupGradient)
-    bpy.utils.unregister_class(NODE_OT_texGroupScanlines)
-    bpy.utils.unregister_class(NODE_OT_texGroupFilmGrain)
-    bpy.utils.unregister_class(NODE_OT_texGroupFilmGrain2)
-    bpy.utils.unregister_class(NODE_OT_markerremGroup)
-    bpy.utils.unregister_class(Addition1OP)
-    bpy.utils.unregister_class(Addition2OP)
-    bpy.utils.unregister_class(Addition3OP)
-    bpy.utils.unregister_class(Addition4OP)
-    bpy.utils.unregister_class(Addition5OP)
-    bpy.utils.unregister_class(Addition6OP)
-    bpy.utils.unregister_class(Addition7OP)
-    bpy.utils.unregister_class(Addition8OP)
-    bpy.utils.unregister_class(Addition9OP)
-    bpy.utils.unregister_class(Sub18Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub1Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub2Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub3Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub4Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub5Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub6Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub7Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub8Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub15Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub20Panel)
-    bpy.utils.unregister_class(Sub9Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub16Panel)
-    bpy.utils.unregister_class(Sub10Panel)
-    del bpy.types.Object.expanded
-    bpy.utils.unregister_class(Sub17Panel)
+    
+    for km,kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
+    
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
     
     
-        
 
-
+       
 if __name__ == "__main__":
     register()
+
+
+
+    
+    
+ 
